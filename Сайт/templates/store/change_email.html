@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Emailni o‘zgartirish — Apple{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'profile' %}">← Profilga qaytish</a>
+  <div class="auth-panel">
+    <p class="eyebrow">Apple hisobi · Xavfsizlik</p>
+    <h1 class="auth-title">Email manzilingizni o‘zgartiring.</h1>
+    <p class="auth-intro">Yangi email manzilingizni kiriting. Manzilni saqlashdan oldin unga tasdiqlash kodi yuboramiz.</p>
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Tasdiqlash kodini yuborish <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</section>
+{% endblock %}

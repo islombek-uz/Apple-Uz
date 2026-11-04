@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} — Apple{% endblock %}
+{% block content %}
+<section class="detail-page">
+  <a class="back-link" href="{% url 'home' %}">← Barcha mahsulotlar</a>
+  <div class="detail-layout">
+    <div class="detail-visual"><img src="{{ product.image_url }}" alt="{{ product.name }} mahsulot surati" fetchpriority="high"></div>
+    <div class="detail-copy"><p class="eyebrow">{{ product.category }} · {{ product.finish }}</p><h1>{{ product.name }}</h1><p class="detail-tagline">{{ product.tagline }}</p><p class="detail-description">Kundalik foydalanish uchun puxta o‘ylangan Apple qurilmasi. {{ product.finish }} qoplamasi va ixcham dizayni bilan ish, ijod hamda hordiq uchun mos.</p><p class="detail-price">{{ product.price_display }} so‘m</p><button class="button button-dark add-to-bag" data-product-id="{{ product.pk }}" data-product="{{ product.name }}" data-price="{{ product.price }}">Savatga qo‘shish <span aria-hidden="true">+</span></button><p class="delivery-note">Bepul yetkazib berish · Qulay to‘lov</p></div>
+  </div>
+  <section class="specifications" aria-labelledby="specifications-heading">
+    <p class="eyebrow">Mahsulot haqida</p><h2 id="specifications-heading">Asosiy ma’lumotlar</h2>
+    <table class="specification-table"><tbody>
+      <tr><th scope="row">Model</th><td>{{ product.name }}</td></tr>
+      <tr><th scope="row">Kategoriya</th><td>{{ product.category }}</td></tr>
+      <tr><th scope="row">Qisqa tavsif</th><td>{{ product.tagline }}</td></tr>
+      <tr><th scope="row">Rang</th><td>{{ product.finish }}</td></tr>
+      <tr><th scope="row">Narx</th><td>{{ product.price_display }} so‘m</td></tr>
+    </tbody></table>
+  </section>
+</section>
+{% endblock %}

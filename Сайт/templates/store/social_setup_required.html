@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ provider_name }} orqali kirish — sozlash kerak{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'login' %}">← Kirishga qaytish</a>
+  <div class="auth-panel social-setup-panel">
+    <p class="eyebrow">Apple hisobi · {{ provider_name }}</p>
+    <h1 class="auth-title">Bir sozlama qoldi.</h1>
+    <p class="auth-intro">{{ provider_name }} orqali kirish kodi tayyor, ammo Google OAuth kalitlari ulanmaguncha Google hisobiga yo‘naltirib bo‘lmaydi.</p>
+    <div class="social-setup-steps">
+      {% if provider_name == 'Google' %}
+      <p>1. Google Cloud Console’da loyiha tanlang yoki yarating, OAuth consent screen’ni sozlang. Test rejimida kiradigan Google hisobingizni test user sifatida qo‘shing.</p>
+      <p>2. Credentials → Create credentials → OAuth client ID → Web application’ni tanlang.</p>
+      <p>3. Authorized redirect URI maydoniga aynan shu manzilni qo‘shing: <code>{{ callback_url }}</code></p>
+      <p>4. Yaratilgan Client ID va Client secret’ni loyiha papkasidagi `.env` fayliga kiriting:</p>
+      <pre><code>{{ client_id_env }}=Google’dan_olingan_Client_ID
+{{ secret_env }}=Google’dan_olingan_Client_secret</code></pre>
+      <p>Client secret’ni chatga yoki frontend kodiga joylamang. `.env` Git’ga qo‘shilmaydi.</p>
+      <p>5. Django serverini to‘xtatib qayta ishga tushiring, so‘ng Google tugmasini yana bosing.</p>
+      {% else %}
+      <p>Server muhitiga <code>{{ client_id_env }}</code> va <code>{{ secret_env }}</code> qiymatlarini qo‘shing.</p>
+      <p>BotFather’dan olingan bot ID/tokenni kiriting va BotFather’da domenni ro‘yxatdan o‘tkazing.</p>
+      <p>So‘ng Django serverini qayta ishga tushirib, yana urinib ko‘ring.</p>
+      {% endif %}
+    </div>
+    <a class="button button-dark auth-submit" href="{% url 'login' %}">Kirish sahifasiga qaytish</a>
+  </div>
+</section>
+{% endblock %}

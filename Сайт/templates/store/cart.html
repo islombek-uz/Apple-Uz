@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Savat — Apple{% endblock %}
+{% block content %}
+<section class="cart-page" id="cart-page" data-clear-cart="{{ clear_cart|yesno:'true,false' }}">
+  <a class="back-link" href="{% url 'home' %}">← Do‘konga qaytish</a>
+  <div class="cart-heading">
+    <p class="eyebrow">Apple Store · Buyurtma</p>
+    <h1>Savatingiz.</h1>
+  </div>
+  <div class="cart-layout">
+    <section class="cart-summary" aria-labelledby="cart-items-heading">
+      <h2 id="cart-items-heading">Mahsulotlar</h2>
+      <div id="cart-items" aria-live="polite"></div>
+      <p class="cart-total" id="cart-total"></p>
+      <p class="cart-note">To‘lov demo rejimida simulyatsiya qilinadi. Haqiqiy pul yechilmaydi.</p>
+    </section>
+    <form class="cart-checkout auth-form" method="post" action="{% url 'checkout' %}" id="checkout-form">
+      {% csrf_token %}
+      <input type="hidden" name="cart_items" id="cart-items-input">
+      <h2>Yetkazib berish ma’lumotlari</h2>
+      {% if form.non_field_errors %}<div class="auth-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button id="checkout-btn" class="button button-dark auth-submit" type="submit">Buyurtmani tasdiqlash <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</section>
+{{ cart_catalog|json_script:"cart-catalog" }}
+<script>
+(() => {
+  const storageKey = 'apple-bag';
+  const list = document.getElementById('cart-items');
+  const total = document.getElementById('cart-total');
+  const input = document.getElementById('cart-items-input');
+  const form = document.getElementById('checkout-form');
+  const checkoutButton = document.getElementById('checkout-btn');
+  const bagCount = document.querySelector('.bag-count');
+  const catalog = new Map(JSON.parse(document.getElementById('cart-catalog').textContent).map((product) => [product.id, product]));
+
+  function readBag() {
+    try {
+      const items = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      return Array.isArray(items) ? items.filter((item) => item && typeof item === 'object' && !Array.isArray(item)) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveBag(items) {
+    localStorage.setItem(storageKey, JSON.stringify(items));
+    render();
+  }
+
+  function render() {
+    const items = readBag();
+    list.replaceChildren();
+    let amount = 0;
+    let valid = items.length > 0;
+
+    for (const [index, item] of items.entries()) {
+      const row = document.createElement('article');
+      row.className = 'cart-item';
+      const details = document.createElement('div');
+      details.className = 'cart-item-details';
+      const name = document.createElement('h3');
+      const product = catalog.get(Number(item.id));
+      const hasProduct = Boolean(product);
+      name.textContent = hasProduct ? product.name : 'Mavjud bo‘lmagan mahsulot';
+      details.append(name);
+      const quantityIsValid = Number.isSafeInteger(Number(item.quantity)) && Number(item.quantity) >= 1 && Number(item.quantity) <= 99;
+      if (!hasProduct || !quantityIsValid) {
+        valid = false;
+        const warning = document.createElement('p');
+        warning.textContent = hasProduct ? 'Miqdor 1 dan 99 gacha bo‘lishi kerak.' : 'Mahsulotni qayta savatga qo‘shing.';
+        details.append(warning);
+      }
+
+      const controls = document.createElement('div');
+      controls.className = 'cart-item-controls';
+      const quantity = Number.isSafeInteger(Number(item.quantity)) ? Math.max(1, Number(item.quantity)) : 1;
+      const decrement = document.createElement('button');
+      decrement.type = 'button';
+      decrement.className = 'cart-quantity-button';
+      decrement.setAttribute('aria-label', `${name.textContent} miqdorini kamaytirish`);
+      decrement.textContent = '−';
+      decrement.addEventListener('click', () => {
+        const updated = readBag();
+        if (quantity <= 1) updated.splice(index, 1);
+        else updated[index].quantity = quantity - 1;
+        saveBag(updated);
+      });
+      const quantityLabel = document.createElement('span');
+      quantityLabel.textContent = String(quantity);
+      const increment = document.createElement('button');
+      increment.type = 'button';
+      increment.className = 'cart-quantity-button';
+      increment.setAttribute('aria-label', `${name.textContent} miqdorini oshirish`);
+      increment.textContent = '+';
+      increment.addEventListener('click', () => {
+        const updated = readBag();
+        if (updated[index]) updated[index].quantity = Math.min(99, quantity + 1);
+        saveBag(updated);
+      });
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'cart-remove-button';
+      remove.textContent = 'O‘chirish';
+      remove.addEventListener('click', () => {
+        const updated = readBag();
+        updated.splice(index, 1);
+        saveBag(updated);
+      });
+      controls.append(decrement, quantityLabel, increment, remove);
+      row.append(details, controls);
+      list.append(row);
+      if (hasProduct && quantityIsValid) amount += product.price * quantity;
+    }
+
+    if (!items.length) {
+      const empty = document.createElement('p');
+      empty.className = 'cart-empty';
+      empty.textContent = 'Savatingiz hozircha bo‘sh.';
+      list.append(empty);
+    }
+    total.textContent = amount ? `Jami: ${amount.toLocaleString('uz-UZ')} so‘m` : '';
+    input.value = JSON.stringify(items.map((item) => ({ id: Number(item.id), quantity: Number(item.quantity) })));
+    checkoutButton.disabled = !valid;
+    if (bagCount) bagCount.textContent = String(items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0));
+  }
+
+  if (document.getElementById('cart-page').dataset.clearCart === 'true') {
+    localStorage.removeItem(storageKey);
+  }
+  form.addEventListener('submit', (event) => {
+    const items = readBag();
+    if (!items.length || items.some((item) => !catalog.has(Number(item.id)) || !Number.isSafeInteger(Number(item.quantity)) || Number(item.quantity) < 1 || Number(item.quantity) > 99)) {
+      event.preventDefault();
+      render();
+      return;
+    }
+    input.value = JSON.stringify(items.map((item) => ({ id: Number(item.id), quantity: Number(item.quantity) })));
+  });
+  render();
+})();
+</script>
+{% endblock %}

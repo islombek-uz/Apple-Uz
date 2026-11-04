@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profil — Apple{% endblock %}
+{% block content %}
+<section class="account-section profile-section">
+  <a class="back-link" href="{% url 'home' %}">← Apple Store</a>
+  <div class="profile-panel">
+    <p class="eyebrow">Apple hisobi</p>
+    <h1 class="auth-title">Profilingiz.</h1>
+    <div class="profile-summary">
+      {% if profile.avatar %}
+        <img class="profile-avatar" src="{{ profile.avatar.url }}" alt="Profil rasmi">
+      {% else %}
+        <img class="profile-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+      {% endif %}
+      <div>
+        <h2>{{ request.user.username }}</h2>
+        <p>{{ request.user.email|default:'Email ko‘rsatilmagan' }}</p>
+        <a class="text-button" href="{% url 'change_email' %}">Emailni o‘zgartirish</a>
+      </div>
+    </div>
+    <form class="auth-form profile-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Profilni saqlash <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</section>
+{% endblock %}

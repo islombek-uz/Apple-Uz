@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Emailni tasdiqlash — Apple{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'home' %}">← Apple Store</a>
+  <div class="auth-panel auth-panel-code">
+    <p class="eyebrow">Apple hisobi · Xavfsizlik</p>
+    <h1 class="auth-title">Emailingizni tasdiqlang.</h1>
+    <p class="auth-intro"><strong>{{ email }}</strong> manziliga yuborilgan 6 xonali kodni kiriting. Kod 10 daqiqa amal qiladi.</p>
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="auth-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Tasdiqlash <span aria-hidden="true">→</span></button>
+    </form>
+    <form class="resend-form" method="post">
+      {% csrf_token %}
+      <button class="text-button" type="submit" name="action" value="resend">Yangi kod yuborish</button>
+    </form>
+    <p class="auth-switch">Email noto‘g‘rimi? {% if email_change %}<a href="{% url 'change_email' %}">Boshqa manzil kiriting</a>{% else %}<a href="{% url 'register' %}">Qayta ro‘yxatdan o‘ting</a>{% endif %}</p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git & GitHub — Jamoaviy Ishlash Qo'llanmasi</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-code: #1c2333;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --accent: #58a6ff;
+  --accent-glow: rgba(88, 166, 255, 0.15);
+  --green: #3fb950;
+  --green-glow: rgba(63, 185, 80, 0.12);
+  --orange: #f0883e;
+  --orange-glow: rgba(240, 136, 62, 0.12);
+  --purple: #bc8cff;
+  --purple-glow: rgba(188, 140, 255, 0.12);
+  --red: #f85149;
+  --yellow: #d29922;
+  --pink: #f778ba;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 32px;
+  animation: fadeDown 0.6s ease;
+}
+
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+  animation: fadeDown 0.8s ease;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 20px;
+  color: var(--text-dim);
+  max-width: 600px;
+  animation: fadeDown 1s ease;
+}
+
+.hero-arrow {
+  margin-top: 60px;
+  animation: bounce 2s ease infinite;
+  color: var(--text-dim);
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Navigation */
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  overflow-y: auto;
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.side-nav.open { transform: translateX(0); }
+
+.nav-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 101;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.2s;
+}
+
+.nav-toggle:hover { border-color: var(--accent); }
+
+.side-nav h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  padding: 16px 24px 8px;
+}
+
+.side-nav a {
+  display: block;
+  padding: 8px 24px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.side-nav a:hover {
+  color: var(--text);
+  background: var(--accent-glow);
+  border-left-color: var(--accent);
+}
+
+.side-nav a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+/* Content */
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px 120px;
+}
+
+/* Section */
+.section {
+  margin-bottom: 80px;
+  scroll-margin-top: 40px;
+}
+
+.section-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.section h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.section h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  margin-top: 12px;
+  border-radius: 2px;
+}
+
+.section h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 40px 0 16px;
+  color: var(--text);
+}
+
+.section p {
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.section p strong {
+  color: var(--text);
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+  transition: border-color 0.2s;
+}
+
+.card:hover { border-color: var(--accent); }
+
+.card-accent-green { border-left: 3px solid var(--green); }
+.card-accent-orange { border-left: 3px solid var(--orange); }
+.card-accent-purple { border-left: 3px solid var(--purple); }
+.card-accent-blue { border-left: 3px solid var(--accent); }
+
+.card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Code blocks */
+.code-block {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.code-header .lang-tag {
+  padding: 2px 8px;
+  background: var(--accent-glow);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.code-body {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.code-body pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre;
+}
+
+.cmd { color: var(--green); }
+.flag { color: var(--orange); }
+.str { color: var(--accent); }
+.cmt { color: var(--text-dim); font-style: italic; }
+.var { color: var(--purple); }
+
+/* Info boxes */
+.info-box {
+  display: flex;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 15px;
+}
+
+.info-box.tip {
+  background: var(--green-glow);
+  border: 1px solid rgba(63, 185, 80, 0.25);
+}
+
+.info-box.warn {
+  background: var(--orange-glow);
+  border: 1px solid rgba(240, 136, 62, 0.25);
+}
+
+.info-box.danger {
+  background: rgba(248, 81, 73, 0.08);
+  border: 1px solid rgba(248, 81, 73, 0.25);
+}
+
+.info-box .icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.info-box p { color: var(--text-dim); margin: 0; }
+.info-box p strong { color: var(--text); }
+
+/* Flow diagram */
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  margin: 24px 0;
+}
+
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+.flow-step .num {
+  width: 24px; height: 24px;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.flow-arrow {
+  color: var(--text-dim);
+  font-size: 20px;
+}
+
+/* Team grid */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.team-member {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.team-member:hover { border-color: var(--purple); transform: translateY(-2px); }
+
+.team-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.team-member:nth-child(1) .team-avatar { background: var(--accent-glow); color: var(--accent); }
+.team-member:nth-child(2) .team-avatar { background: var(--green-glow); color: var(--green); }
+.team-member:nth-child(3) .team-avatar { background: var(--orange-glow); color: var(--orange); }
+.team-member:nth-child(4) .team-avatar { background: var(--purple-glow); color: var(--purple); }
+.team-member:nth-child(5) .team-avatar { background: rgba(247,120,186,0.12); color: var(--pink); }
+
+.team-member .name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.team-member .branch {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--green);
+  margin-top: 4px;
+}
+
+/* Branch diagram */
+.branch-diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.branch-diagram svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Steps list */
+.steps-list {
+  counter-reset: step;
+  margin: 20px 0;
+}
+
+.step-item {
+  display: flex;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.step-item:last-child { border-bottom: none; }
+
+.step-num {
+  counter-increment: step;
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: var(--accent-glow);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.step-content h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.step-content p { color: var(--text-dim); margin: 0; }
+
+/* Table */
+.cmd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 15px;
+}
+
+.cmd-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--border);
+}
+
+.cmd-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.cmd-table td:first-child {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.cmd-table td:last-child { color: var(--text-dim); }
+.cmd-table tr:hover { background: rgba(255,255,255,0.02); }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 60px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 40px; letter-spacing: -1px; }
+  .content { padding: 0 16px 80px; }
+  .section h2 { font-size: 28px; }
+  .flow { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+  .cmd-table { font-size: 13px; }
+  .cmd-table td:first-child { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav Toggle -->
+<button class="nav-toggle" onclick="document.querySelector('.side-nav').classList.toggle('open')">☰</button>
+
+<!-- Side Navigation -->
+<nav class="side-nav">
+  <h3>Asoslar</h3>
+  <a href="#git-nima">Git nima?</a>
+  <a href="#github-nima">GitHub nima?</a>
+  <a href="#ornartish">Git o'rnatish</a>
+  <h3>Ishlash</h3>
+  <a href="#repository">Repository yaratish</a>
+  <a href="#branch">Branch tushunchasi</a>
+  <a href="#jamoa">Jamoaviy ish tartibi</a>
+  <h3>Buyruqlar</h3>
+  <a href="#asosiy-buyruqlar">Asosiy buyruqlar</a>
+  <a href="#branch-buyruqlar">Branch buyruqlari</a>
+  <a href="#remote-buyruqlar">Remote buyruqlar</a>
+  <h3>Amaliyot</h3>
+  <a href="#workflow">Ish jarayoni</a>
+  <a href="#pull-request">Pull Request</a>
+  <a href="#conflict">Konfliktlar</a>
+  <a href="#qoidalar">Jamoa qoidalari</a>
+  <a href="#yordam">Tez-tez xatolar</a>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Jamoaviy loyiha qo'llanmasi
+  </div>
+  <h1>Git & <span>GitHub</span></h1>
+  <p class="hero-sub">5 nafar dasturchi uchun jamoaviy loyihada ishlash bo'yicha to'liq qo'llanma. Noldan boshlab, professional darajagacha.</p>
+  <div class="hero-arrow">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</header>
+
+<!-- Content -->
+<main class="content">
+
+  <!-- ==================== 01. GIT NIMA ==================== -->
+  <section class="section" id="git-nima">
+    <div class="section-number">01 — ASOSLAR</div>
+    <h2>Git nima?</h2>
+
+    <p><strong>Git</strong> — bu versiya boshqaruv tizimi (Version Control System). Oddiy qilib aytganda, Git sizning kodingizning har bir o'zgarishini eslab qoladi. Xuddi "Ctrl+Z" tugmasiga o'xshaydi, lekin minglab qadam orqaga qaytish imkonini beradi.</p>
+
+    <div class="card card-accent-green">
+      <h4>🎮 Hayotiy misol</h4>
+      <p>Tasavvur qiling: siz katta referat yozyapsiz. Har safar o'zgartirish kiritganingizda "referat_v1.docx", "referat_v2.docx", "referat_final.docx", "referat_final_oxirgi.docx" deb saqlaysiz. Git aynan shu muammoni hal qiladi — u har bir o'zgarishni avtomatik eslab qoladi va siz istalgan vaqtda oldingi versiyaga qaytishingiz mumkin.</p>
+    </div>
+
+    <h3>Git nima uchun kerak?</h3>
+    <p><strong>Tarixni saqlash</strong> — har bir o'zgarish saqlanadi, kim, qachon, nima o'zgartirganini bilish mumkin.</p>
+    <p><strong>Jamoaviy ishlash</strong> — bir nechta dasturchi bir loyihada parallel ishlashi mumkin, bir-birining kodiga halaqit bermasdan.</p>
+    <p><strong>Xavfsizlik</strong> — xato bo'lsa, oldingi holatga qaytish oson.</p>
+    <p><strong>Eksperimental ishlash</strong> — yangi g'oyalarni sinab ko'rish uchun alohida "shoxcha" (branch) ochib, asosiy kodga tegmasdan ishlash mumkin.</p>
+
+    <div class="info-box tip">
+      <span class="icon">💡</span>
+      <p><strong>Eslab qoling:</strong> Git — bu dastur, u sizning kompyuteringizda o'rnatiladi va ishlaydi. Internet kerak emas. GitHub esa — bu onlayn platforma.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 02. GITHUB NIMA ==================== -->
+  <section class="section" id="github-nima">
+    <div class="section-number">02 — PLATFORMA</div>
+    <h2>GitHub nima?</h2>
+
+    <p><strong>GitHub</strong> — bu Git repositorylarini (loyiha papkalarini) internetda saqlash uchun platforma. U Git bilan ishlaydi, lekin Git emas. GitHub kodingizni bulutda saqlaydi va jamoa bilan birga ishlash imkonini beradi.</p>
+
+    <div class="card card-accent-blue">
+      <h4>📱 Git vs GitHub — farqi</h4>
+      <p><strong>Git</strong> = Sizning telefoningizdagi kamera. U rasmlarni oladi (o'zgarishlarni saqlaydi).</p>
+      <p style="margin-top: 8px;"><strong>GitHub</strong> = Google Photos. U rasmlarni bulutda saqlaydi va boshqalar bilan ulashadi.</p>
+      <p style="margin-top: 12px; color: var(--text);">Siz Git'siz GitHub'ni ishlata olmaysiz, lekin Git'ni GitHub'siz ishlatishingiz mumkin.</p>
+    </div>
+
+    <h3>GitHub nima beradi?</h3>
+    <p><strong>Markaziy saqlash</strong> — barcha jamoa a'zolari bir joydan kod oladi va yuklaydi.</p>
+    <p><strong>Pull Request</strong> — kodingizni tekshirish uchun so'rov yuborasiz, boshqalar ko'rib chiqadi.</p>
+    <p><strong>Issues</strong> — vazifalarni yozish, xatolarni qayd qilish mumkin.</p>
+    <p><strong>Actions</strong> — avtomatik test va deploy qilish mumkin.</p>
+  </section>
+
+  <!-- ==================== 03. O'RNATISH ==================== -->
+  <section class="section" id="ornartish">
+    <div class="section-number">03 — SOZLASH</div>
+    <h2>Git o'rnatish va sozlash</h2>
+
+    <h3>Windows uchun</h3>
+    <p><strong>git-scm.com</strong> saytidan yuklab oling va o'rnating. O'rnatish jarayonida barcha standart sozlamalarni qoldiring.</p>
+
+    <h3>Mac uchun</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmd">brew</span> install git</pre>
+      </div>
+    </div>
+
+    <h3>Linux (Ubuntu) uchun</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmd">sudo apt</span> install git</pre>
+      </div>
+    </div>
+
+    <h3>Birinchi sozlash (MAJBURIY)</h3>
+    <p>Git o'rnatilgandan keyin, o'zingizni tanishtirishingiz kerak. Bu ma'lumotlar har bir commit'da ko'rinadi:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Ismingizni kiriting</span>
+<span class="cmd">git config</span> <span class="flag">--global</span> user.name <span class="str">"Ismingiz Familiyangiz"</span>
+
+<span class="cmt"># Email manzilingizni kiriting (GitHub'dagi email bilan bir xil bo'lsin)</span>
+<span class="cmd">git config</span> <span class="flag">--global</span> user.email <span class="str">"email@example.com"</span>
+
+<span class="cmt"># Tekshirish</span>
+<span class="cmd">git config</span> <span class="flag">--list</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box warn">
+      <span class="icon">⚠️</span>
+      <p><strong>Muhim:</strong> <code>user.email</code> — GitHub akkauntingizdagi email bilan bir xil bo'lishi kerak. Aks holda, commitlar sizning profilingizga bog'lanmaydi.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 04. REPOSITORY ==================== -->
+  <section class="section" id="repository">
+    <div class="section-number">04 — REPOSITORY</div>
+    <h2>Repository (Repo) yaratish</h2>
+
+    <p><strong>Repository</strong> — bu loyihangizning barcha fayllari va Git tarixi saqlanadigan papka. Har bir loyiha uchun bitta repo bo'ladi.</p>
+
+    <h3>GitHub'da yangi repo yaratish</h3>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>GitHub.com'ga kiring</h4>
+          <p>O'z akkauntingiz bilan login qiling. Agar akkauntingiz bo'lmasa, ro'yxatdan o'ting.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>"New repository" tugmasini bosing</h4>
+          <p>Yuqori o'ng burchakdagi "+" tugmasi → "New repository".</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Repo nomini kiriting</h4>
+          <p>Masalan: <code>my-awesome-project</code>. Bo'sh joy ishlatmang, o'rniga tire (-) yoki pastki chiziq (_) qo'ying.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Sozlamalar</h4>
+          <p>"Public" yoki "Private" tanlang. "Add a README file" ni belgilang. Keyin "Create repository" tugmasini bosing.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Repo'ni kompyuterga klonlash</h3>
+    <p>GitHub'da repo yaratilgandan so'ng, uni kompyuteringizga yuklab olishingiz kerak:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># GitHub'dan loyihani yuklab olish</span>
+<span class="cmd">git clone</span> <span class="str">https://github.com/USERNAME/REPO-NAME.git</span>
+
+<span class="cmt"># Loyiha papkasiga kirish</span>
+<span class="cmd">cd</span> REPO-NAME</pre>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <span class="icon">💡</span>
+      <p><strong>Maslahat:</strong> <code>USERNAME</code> o'rniga GitHub foydalanuvchi nomingizni, <code>REPO-NAME</code> o'rniga repo nomini yozing. Bu havolani GitHub repo sahifasidagi yashil "Code" tugmasidan nusxalashingiz mumkin.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 05. BRANCH ==================== -->
+  <section class="section" id="branch">
+    <div class="section-number">05 — BRANCH</div>
+    <h2>Branch (Shoxcha) tushunchasi</h2>
+
+    <p><strong>Branch</strong> — bu loyihaning alohida nusxasi. Asosiy kodga tegmasdan o'z ishingizni qilishingiz mumkin. Tayyor bo'lganda, asosiy kodga qo'shiladi.</p>
+
+    <div class="card card-accent-purple">
+      <h4>🌳 Hayotiy misol</h4>
+      <p>Tasavvur qiling: <strong>daraxt</strong>. Tanasi — bu <code>main</code> branch (asosiy kod). Har bir shox — alohida branch. Har bir dasturchi o'z shoxida ishlaydi, va tayyor bo'lgandan keyin, meva (kod) asosiy tanaga qo'shiladi.</p>
+    </div>
+
+    <!-- Branch SVG diagram -->
+    <div class="branch-diagram">
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:700px;">
+        <!-- Main branch line -->
+        <line x1="50" y1="140" x2="650" y2="140" stroke="#58a6ff" stroke-width="3" stroke-dasharray="0"/>
+        <text x="30" y="145" fill="#58a6ff" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="end">main</text>
+
+        <!-- Feature branch 1 (Ali) -->
+        <path d="M150,140 Q180,140 200,80" fill="none" stroke="#3fb950" stroke-width="2"/>
+        <line x1="200" y1="80" x2="380" y2="80" stroke="#3fb950" stroke-width="2"/>
+        <path d="M380,80 Q400,80 420,140" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="4"/>
+        <text x="290" y="65" fill="#3fb950" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">feature/ali-header</text>
+
+        <!-- Feature branch 2 (Bobur) -->
+        <path d="M200,140 Q230,140 250,200" fill="none" stroke="#f0883e" stroke-width="2"/>
+        <line x1="250" y1="200" x2="450" y2="200" stroke="#f0883e" stroke-width="2"/>
+        <path d="M450,200 Q470,200 490,140" fill="none" stroke="#f0883e" stroke-width="2" stroke-dasharray="4"/>
+        <text x="350" y="225" fill="#f0883e" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">feature/bobur-footer</text>
+
+        <!-- Feature branch 3 (Sardor) -->
+        <path d="M350,140 Q380,140 400,50" fill="none" stroke="#bc8cff" stroke-width="2"/>
+        <line x1="400" y1="50" x2="550" y2="50" stroke="#bc8cff" stroke-width="2"/>
+        <path d="M550,50 Q570,50 590,140" fill="none" stroke="#bc8cff" stroke-width="2" stroke-dasharray="4"/>
+        <text x="475" y="35" fill="#bc8cff" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">feature/sardor-api</text>
+
+        <!-- Dots on main -->
+        <circle cx="50" cy="140" r="6" fill="#58a6ff"/>
+        <circle cx="150" cy="140" r="6" fill="#58a6ff"/>
+        <circle cx="200" cy="140" r="6" fill="#58a6ff"/>
+        <circle cx="350" cy="140" r="6" fill="#58a6ff"/>
+        <circle cx="420" cy="140" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
+        <circle cx="490" cy="140" r="5" fill="#f0883e" stroke="#161b22" stroke-width="2"/>
+        <circle cx="590" cy="140" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
+        <circle cx="650" cy="140" r="6" fill="#58a6ff"/>
+
+        <!-- Labels -->
+        <text x="420" y="165" fill="#8b949e" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">merge</text>
+        <text x="490" y="165" fill="#8b949e" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">merge</text>
+        <text x="590" y="165" fill="#8b949e" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">merge</text>
+      </svg>
+    </div>
+
+    <h3>Branch qoidalari (bizning loyiha uchun)</h3>
+    <p>Har bir jamoa a'zosi o'z nomida branch ochadi. Branch nomi quyidagi formatda bo'ladi:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">format</span>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Branch nomlash formati:</span>
+<span class="var">feature</span>/<span class="str">ism-vazifa</span>
+
+<span class="cmt"># Misollar:</span>
+feature/ali-header
+feature/bobur-footer
+feature/sardor-login
+feature/dilshod-database
+feature/jasur-homepage</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 06. JAMOA ==================== -->
+  <section class="section" id="jamoa">
+    <div class="section-number">06 — JAMOA</div>
+    <h2>Jamoaviy ish tartibi</h2>
+
+    <p>Bizning loyihada <strong>5 nafar dasturchi</strong> ishlaydi. Har biri o'z qismini oladi va alohida branch'da ishlaydi. Loyiha egasi (siz) har birining ishini tekshirib, <code>main</code> branch'ga qo'shib boradi.</p>
+
+    <div class="team-grid">
+      <div class="team-member">
+        <div class="team-avatar">A</div>
+        <div class="name">Ali</div>
+        <div class="branch">feature/ali-header</div>
+      </div>
+      <div class="team-member">
+        <div class="team-avatar">B</div>
+        <div class="name">Bobur</div>
+        <div class="branch">feature/bobur-footer</div>
+      </div>
+      <div class="team-member">
+        <div class="team-avatar">S</div>
+        <div class="name">Sardor</div>
+        <div class="branch">feature/sardor-api</div>
+      </div>
+      <div class="team-member">
+        <div class="team-avatar">D</div>
+        <div class="name">Dilshod</div>
+        <div class="branch">feature/dilshod-db</div>
+      </div>
+      <div class="team-member">
+        <div class="team-avatar">J</div>
+        <div class="name">Jasur</div>
+        <div class="branch">feature/jasur-home</div>
+      </div>
+    </div>
+
+    <h3>Umumiy ish jarayoni</h3>
+    <div class="flow">
+      <div class="flow-step"><span class="num">1</span> Clone</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">2</span> Branch</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">3</span> Kod yozish</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">4</span> Commit</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">5</span> Push</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">6</span> Pull Request</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">7</span> Merge</div>
+    </div>
+
+    <h3>Jamoa a'zolarini qo'shish (Collaborators)</h3>
+    <p>Loyiha egasi sifatida siz boshqalarni repo'ga qo'shishingiz kerak:</p>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Settings → Collaborators</h4>
+          <p>GitHub'da repo sahifangizga kiring → "Settings" → "Collaborators" bo'limiga o'ting.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Add people</h4>
+          <p>"Add people" tugmasini bosing va har bir jamoa a'zosining GitHub username'ini kiriting.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Taklif qabul qilish</h4>
+          <p>Har bir a'zo o'z emailiga kelgan taklifni qabul qilishi kerak.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 07. ASOSIY BUYRUQLAR ==================== -->
+  <section class="section" id="asosiy-buyruqlar">
+    <div class="section-number">07 — BUYRUQLAR</div>
+    <h2>Asosiy Git buyruqlari</h2>
+
+    <h3>git init — Yangi repo yaratish</h3>
+    <p>Bo'sh papkani Git repository'ga aylantiradi:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Yangi papka yarating va ichiga kiring</span>
+<span class="cmd">mkdir</span> my-project
+<span class="cmd">cd</span> my-project
+
+<span class="cmt"># Git ni ishga tushiring</span>
+<span class="cmd">git init</span></pre>
+      </div>
+    </div>
+
+    <h3>git status — Holatni tekshirish</h3>
+    <p>Qaysi fayllar o'zgargan, qaysilari tayyor — hammasini ko'rsatadi:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmd">git status</span>
+
+<span class="cmt"># Natija misoli:</span>
+<span class="cmt"># On branch main</span>
+<span class="cmt"># Changes not staged for commit:</span>
+<span class="cmt">#   modified:   index.html</span>
+<span class="cmt"># Untracked files:</span>
+<span class="cmt">#   style.css</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <span class="icon">💡</span>
+      <p><strong>Maslahat:</strong> <code>git status</code> ni tez-tez ishlating! Bu eng ko'p ishlatiladigan buyruq. Har qanday amaldan oldin va keyin ishlatib turing.</p>
+    </div>
+
+    <h3>git add — Fayllarni tayyorlash (Staging)</h3>
+    <p>O'zgargan fayllarni commit'ga tayyorlaydi:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Bitta faylni qo'shish</span>
+<span class="cmd">git add</span> <span class="str">index.html</span>
+
+<span class="cmt"># Bir nechta faylni qo'shish</span>
+<span class="cmd">git add</span> <span class="str">index.html style.css script.js</span>
+
+<span class="cmt"># BARCHA o'zgargan fayllarni qo'shish</span>
+<span class="cmd">git add</span> <span class="flag">.</span>
+
+<span class="cmt"># Bitta papkadagi barcha fayllarni qo'shish</span>
+<span class="cmd">git add</span> <span class="str">src/</span></pre>
+      </div>
+    </div>
+
+    <h3>git commit — O'zgarishlarni saqlash</h3>
+    <p>Tayyorlangan fayllarni Git tarixiga saqlaydi. Har bir commit — loyiha tarixidagi bir nuqta:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Commit yaratish (xabar bilan)</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Header qismini yaratdim"</span>
+
+<span class="cmt"># Yaxshi commit xabarlari misollari:</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Login sahifasi formasi qo'shildi"</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Footer dizayni tuzatildi"</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"API bilan bog'lanish qo'shildi"</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box warn">
+      <span class="icon">⚠️</span>
+      <p><strong>Qoida:</strong> Commit xabari qisqa va tushunarli bo'lsin. Nima qilganingizni yozing. <code>"fix"</code> yoki <code>"update"</code> deb yozmang — bu hech narsani anglatmaydi!</p>
+    </div>
+
+    <h3>git log — Tarixni ko'rish</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># To'liq tarix</span>
+<span class="cmd">git log</span>
+
+<span class="cmt"># Qisqa ko'rinish (bir qatorda)</span>
+<span class="cmd">git log</span> <span class="flag">--oneline</span>
+
+<span class="cmt"># Chiroyli grafik ko'rinish</span>
+<span class="cmd">git log</span> <span class="flag">--oneline --graph --all</span></pre>
+      </div>
+    </div>
+
+    <h3>git diff — O'zgarishlarni ko'rish</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Hali add qilinmagan o'zgarishlar</span>
+<span class="cmd">git diff</span>
+
+<span class="cmt"># Add qilingan (staged) o'zgarishlar</span>
+<span class="cmd">git diff</span> <span class="flag">--staged</span></pre>
+      </div>
+    </div>
+
+    <h3>Umumiy jarayon: add → commit</h3>
+    <div class="flow">
+      <div class="flow-step"><span class="num">1</span> Kod yozish</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">2</span> git add .</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><span class="num">3</span> git commit -m "xabar"</div>
+    </div>
+  </section>
+
+  <!-- ==================== 08. BRANCH BUYRUQLARI ==================== -->
+  <section class="section" id="branch-buyruqlar">
+    <div class="section-number">08 — BRANCHLAR</div>
+    <h2>Branch buyruqlari</h2>
+
+    <h3>Branchlar bilan ishlash</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Barcha branchlarni ko'rish</span>
+<span class="cmd">git branch</span>
+
+<span class="cmt"># Yangi branch yaratish</span>
+<span class="cmd">git branch</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># Boshqa branchga o'tish</span>
+<span class="cmd">git checkout</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># Yangi branch yaratish VA o'tish (bir buyruqda)</span>
+<span class="cmd">git checkout</span> <span class="flag">-b</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># Zamonaviy variant (yangi usul)</span>
+<span class="cmd">git switch</span> <span class="str">feature/ali-header</span>
+<span class="cmd">git switch</span> <span class="flag">-c</span> <span class="str">feature/ali-header</span>  <span class="cmt"># yaratish + o'tish</span>
+
+<span class="cmt"># Branch o'chirish (faqat merge qilingandan keyin)</span>
+<span class="cmd">git branch</span> <span class="flag">-d</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># Remote branchlar bilan birga ko'rish</span>
+<span class="cmd">git branch</span> <span class="flag">-a</span></pre>
+      </div>
+    </div>
+
+    <h3>Merge — Branchlarni birlashtirish</h3>
+    <p>Biror branch'dagi ish tayyor bo'lganda, uni <code>main</code> branch'ga qo'shish kerak:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Avval main branchga o'ting</span>
+<span class="cmd">git checkout</span> <span class="str">main</span>
+
+<span class="cmt"># So'nggi o'zgarishlarni GitHub'dan oling</span>
+<span class="cmd">git pull</span> <span class="str">origin main</span>
+
+<span class="cmt"># Branch'ni main'ga qo'shing</span>
+<span class="cmd">git merge</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># Natijani GitHub'ga yuboring</span>
+<span class="cmd">git push</span> <span class="str">origin main</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box danger">
+      <span class="icon">🚫</span>
+      <p><strong>Diqqat:</strong> <code>main</code> branch'ga to'g'ridan-to'g'ri kod yozmang! Har doim alohida branch'da ishlang va Pull Request orqali qo'shing.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 09. REMOTE BUYRUQLAR ==================== -->
+  <section class="section" id="remote-buyruqlar">
+    <div class="section-number">09 — REMOTE</div>
+    <h2>Remote (GitHub) buyruqlari</h2>
+
+    <p><strong>Remote</strong> — bu loyihaning GitHub'dagi nusxasi. <code>origin</code> — bu remote'ning standart nomi.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Remote'larni ko'rish</span>
+<span class="cmd">git remote</span> <span class="flag">-v</span>
+
+<span class="cmt"># GitHub'dan so'nggi o'zgarishlarni olish</span>
+<span class="cmd">git pull</span> <span class="str">origin main</span>
+
+<span class="cmt"># O'z branch'ingizni GitHub'ga yuklash</span>
+<span class="cmd">git push</span> <span class="str">origin feature/ali-header</span>
+
+<span class="cmt"># Birinchi marta push qilayotganda (branch'ni bog'lash)</span>
+<span class="cmd">git push</span> <span class="flag">-u</span> <span class="str">origin feature/ali-header</span>
+<span class="cmt"># -u dan keyin oddiy "git push" yetarli</span>
+
+<span class="cmt"># GitHub'dagi barcha branch'larni yangilash</span>
+<span class="cmd">git fetch</span> <span class="flag">--all</span>
+
+<span class="cmt"># Boshqa odamning branch'ini olish</span>
+<span class="cmd">git fetch</span> <span class="str">origin</span>
+<span class="cmd">git checkout</span> <span class="str">feature/bobur-footer</span></pre>
+      </div>
+    </div>
+
+    <h3>Push va Pull — farqi</h3>
+    <div class="card card-accent-blue">
+      <h4>📤 git push — Yuklash</h4>
+      <p>Sizning kompyuteringizdagi o'zgarishlarni GitHub'ga yuboradi. Xuddi faylni Google Drive'ga yuklash kabi.</p>
+    </div>
+    <div class="card card-accent-green">
+      <h4>📥 git pull — Yuklab olish</h4>
+      <p>GitHub'dagi so'nggi o'zgarishlarni kompyuteringizga yuklab oladi. Boshqalar qilgan o'zgarishlarni olish uchun ishlatiladi.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 10. WORKFLOW ==================== -->
+  <section class="section" id="workflow">
+    <div class="section-number">10 — ISH JARAYONI</div>
+    <h2>Har bir dasturchi uchun ish jarayoni</h2>
+
+    <p>Quyida har bir jamoa a'zosi har kuni bajarishi kerak bo'lgan buyruqlar ketma-ketligi:</p>
+
+    <h3>🟢 Ishni boshlash (har kuni)</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">har kuni</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># 1. Main'dagi so'nggi o'zgarishlarni oling</span>
+<span class="cmd">git checkout</span> <span class="str">main</span>
+<span class="cmd">git pull</span> <span class="str">origin main</span>
+
+<span class="cmt"># 2. O'z branchingizga qayting</span>
+<span class="cmd">git checkout</span> <span class="str">feature/ali-header</span>
+
+<span class="cmt"># 3. Main'dagi yangilanishlarni o'z branchingizga qo'shing</span>
+<span class="cmd">git merge</span> <span class="str">main</span>
+
+<span class="cmt"># 4. Endi ishlashni boshlang!</span></pre>
+      </div>
+    </div>
+
+    <h3>🔵 Ishni saqlash (kun davomida)</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">kun davomida</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Holatni tekshiring</span>
+<span class="cmd">git status</span>
+
+<span class="cmt"># O'zgarishlarni tayyorlang</span>
+<span class="cmd">git add</span> <span class="flag">.</span>
+
+<span class="cmt"># Commit qiling</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Navbar responsiv dizayn qo'shildi"</span>
+
+<span class="cmt"># GitHub'ga yuboring</span>
+<span class="cmd">git push</span> <span class="str">origin feature/ali-header</span></pre>
+      </div>
+    </div>
+
+    <h3>🟣 Ish tugaganda (Pull Request)</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">ish tugaganda</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Oxirgi marta hamma narsani push qiling</span>
+<span class="cmd">git add</span> <span class="flag">.</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Header qismi tayyor"</span>
+<span class="cmd">git push</span> <span class="str">origin feature/ali-header</span>
+
+<span class="cmt"># Keyin GitHub.com'ga kiring va Pull Request oching</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 11. PULL REQUEST ==================== -->
+  <section class="section" id="pull-request">
+    <div class="section-number">11 — PULL REQUEST</div>
+    <h2>Pull Request (PR) yaratish</h2>
+
+    <p><strong>Pull Request</strong> — bu "Mening kodimni ko'rib chiqing va main'ga qo'shing" degan so'rov. Bu jamoaviy ishlashning eng muhim qismi.</p>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>GitHub.com'ga kiring</h4>
+          <p>Repo sahifasiga o'ting. Siz push qilganingizdan keyin, sariq banner paydo bo'ladi: "Compare & pull request" — shu tugmani bosing.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>PR ma'lumotlarini to'ldiring</h4>
+          <p><strong>Title:</strong> Qisqa sarlavha. Masalan: "Header komponenti tayyor".</p>
+          <p><strong>Description:</strong> Nima qilganingizni batafsil yozing. Qanday sahifalar qo'shildi, qanday funksiyalar ishlaydi.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Reviewer tayinlang</h4>
+          <p>O'ng tomonda "Reviewers" bo'limida loyiha egasini (sizni) tanlang.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>"Create Pull Request" tugmasini bosing</h4>
+          <p>PR yaratildi! Endi loyiha egasi tekshiradi va merge qiladi.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Loyiha egasi: PR ni tekshirish va merge qilish</h3>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>PR ni ochib, "Files changed" tabini ko'ring</h4>
+          <p>Barcha o'zgarishlar yashil (qo'shilgan) va qizil (o'chirilgan) rangda ko'rsatiladi.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Kodni tekshiring</h4>
+          <p>Xato bo'lsa — izoh yozing. Yaxshi bo'lsa — "Approve" qiling.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>"Merge pull request" tugmasini bosing</h4>
+          <p>Kod main branch'ga qo'shildi! Endi "Delete branch" tugmasini bosib, eski branch'ni o'chiring.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 12. CONFLICT ==================== -->
+  <section class="section" id="conflict">
+    <div class="section-number">12 — KONFLIKTLAR</div>
+    <h2>Merge Conflict — nima va qanday hal qilish?</h2>
+
+    <p><strong>Conflict</strong> — ikki kishi bir xil faylning bir xil qatorini o'zgartirganda yuzaga keladi. Git qaysi o'zgarishni saqlashni bilmaydi va sizdan so'raydi.</p>
+
+    <div class="card card-accent-orange">
+      <h4>🤝 Hayotiy misol</h4>
+      <p>Ali va Bobur ikkalasi ham <code>index.html</code> faylining 10-qatorini o'zgartirishdi. Ali sarlavhani "Salom" deb yozdi, Bobur esa "Xush kelibsiz" deb yozdi. Git qaysi birini saqlashni bilmaydi — bu <strong>conflict</strong>.</p>
+    </div>
+
+    <h3>Conflict qanday ko'rinadi?</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">conflict misoli</span>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="str">&lt;h1&gt;Salom Dunyo&lt;/h1&gt;</span>
+<span class="cmt">=======</span>
+<span class="var">&lt;h1&gt;Xush kelibsiz&lt;/h1&gt;</span>
+<span class="cmt">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/bobur-footer</span></pre>
+      </div>
+    </div>
+
+    <h3>Conflict'ni hal qilish</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># 1. Faylni oching va <<<, ===, >>> belgilarini o'chiring</span>
+<span class="cmt"># 2. Qaysi kodni saqlashni hal qiling</span>
+<span class="cmt"># 3. Faylni saqlang</span>
+
+<span class="cmt"># 4. O'zgarishlarni staging'ga qo'shing</span>
+<span class="cmd">git add</span> <span class="str">index.html</span>
+
+<span class="cmt"># 5. Conflict hal qilinganini commit qiling</span>
+<span class="cmd">git commit</span> <span class="flag">-m</span> <span class="str">"Merge conflict hal qilindi"</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <span class="icon">💡</span>
+      <p><strong>Maslahat:</strong> Conflict'lardan qochish uchun — har kuni <code>git pull origin main</code> qiling va main'dagi yangilanishlarni o'z branchingizga merge qilib turing. Jamoa a'zolari bir xil faylda ishlamaslikka harakat qilsin.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 13. QOIDALAR ==================== -->
+  <section class="section" id="qoidalar">
+    <div class="section-number">13 — QOIDALAR</div>
+    <h2>Jamoa qoidalari</h2>
+
+    <div class="card card-accent-green">
+      <h4>✅ Har doim qiling</h4>
+      <p>• Har kuni ishdan oldin <code>git pull origin main</code> qiling</p>
+      <p>• Commit xabarlarini tushunarli yozing</p>
+      <p>• O'z branchingizda ishlang, <code>main</code>'ga to'g'ridan-to'g'ri yozmang</p>
+      <p>• Tez-tez commit qiling (har 1-2 soatda, yoki har bir funksiya tayyor bo'lganda)</p>
+      <p>• Push qilishdan oldin <code>git status</code> va <code>git diff</code> bilan tekshiring</p>
+      <p>• Pull Request ochganingizda nima qilganingizni batafsil yozing</p>
+    </div>
+
+    <div class="card card-accent-orange" style="margin-top: 16px;">
+      <h4>❌ Hech qachon qilmang</h4>
+      <p>• <code>main</code> branch'ga to'g'ridan-to'g'ri push qilmang</p>
+      <p>• <code>git push --force</code> ishlatmang (agar bilmasangiz)</p>
+      <p>• Parollar, API kalitlar, va maxfiy ma'lumotlarni commit qilmang</p>
+      <p>• Katta fayllarni (video, zip, image) repo'ga qo'shmang</p>
+      <p>• <code>node_modules</code> papkasini commit qilmang — <code>.gitignore</code> ga qo'shing</p>
+    </div>
+
+    <h3>.gitignore fayli</h3>
+    <p>Ba'zi fayllarni Git kuzatmasligi kerak. Buning uchun <code>.gitignore</code> fayli yaratiladi:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">.gitignore</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Dependencies</span>
+node_modules/
+vendor/
+
+<span class="cmt"># Environment fayllar (maxfiy ma'lumotlar)</span>
+.env
+.env.local
+
+<span class="cmt"># IDE sozlamalari</span>
+.vscode/
+.idea/
+
+<span class="cmt"># Build fayllar</span>
+dist/
+build/
+
+<span class="cmt"># OS fayllari</span>
+.DS_Store
+Thumbs.db</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 14. TEZ-TEZ XATOLAR ==================== -->
+  <section class="section" id="yordam">
+    <div class="section-number">14 — YORDAM</div>
+    <h2>Tez-tez uchraydigan xatolar va yechimlari</h2>
+
+    <h3>"Xato branch'da ishlayapman!"</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Agar commit qilmagan bo'lsangiz:</span>
+<span class="cmd">git stash</span>                           <span class="cmt"># O'zgarishlarni vaqtincha saqlash</span>
+<span class="cmd">git checkout</span> <span class="str">feature/ali-header</span>    <span class="cmt"># Kerakli branchga o'tish</span>
+<span class="cmd">git stash pop</span>                       <span class="cmt"># O'zgarishlarni qaytarish</span></pre>
+      </div>
+    </div>
+
+    <h3>"Commit xabarini xato yozdim!"</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Oxirgi commit xabarini o'zgartirish</span>
+<span class="cmd">git commit</span> <span class="flag">--amend</span> <span class="flag">-m</span> <span class="str">"Yangi to'g'ri xabar"</span></pre>
+      </div>
+    </div>
+
+    <h3>"Faylni commit'dan chiqarish kerak!"</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Staging'dan chiqarish (fayl o'zgarishi saqlanadi)</span>
+<span class="cmd">git reset</span> <span class="str">HEAD fayl-nomi.txt</span>
+
+<span class="cmt"># Oxirgi commit'ni bekor qilish (o'zgarishlar saqlanadi)</span>
+<span class="cmd">git reset</span> <span class="flag">--soft</span> <span class="str">HEAD~1</span></pre>
+      </div>
+    </div>
+
+    <h3>"Fayl o'zgarishini bekor qilish kerak!"</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Bitta faylni oxirgi commit holatiga qaytarish</span>
+<span class="cmd">git checkout</span> <span class="flag">--</span> <span class="str">fayl-nomi.txt</span>
+
+<span class="cmt"># BARCHA o'zgarishlarni bekor qilish (EHTIYOT BO'LING!)</span>
+<span class="cmd">git checkout</span> <span class="flag">--</span> <span class="str">.</span></pre>
+      </div>
+    </div>
+
+    <h3>"Push qilolmayapman!"</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="lang-tag">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">nusxa</button>
+      </div>
+      <div class="code-body">
+<pre><span class="cmt"># Avval pull qiling, keyin push</span>
+<span class="cmd">git pull</span> <span class="str">origin feature/ali-header</span>
+<span class="cmd">git push</span> <span class="str">origin feature/ali-header</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== BUYRUQLAR JADVALI ==================== -->
+  <section class="section" id="jadval">
+    <div class="section-number">15 — TEZKOR MA'LUMOTNOMA</div>
+    <h2>Barcha buyruqlar jadvali</h2>
+
+    <table class="cmd-table">
+      <thead>
+        <tr><th>Buyruq</th><th>Nima qiladi</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>git init</td><td>Yangi Git repository yaratadi</td></tr>
+        <tr><td>git clone URL</td><td>GitHub'dan loyihani yuklab oladi</td></tr>
+        <tr><td>git status</td><td>Hozirgi holatni ko'rsatadi</td></tr>
+        <tr><td>git add .</td><td>Barcha o'zgarishlarni staging'ga qo'shadi</td></tr>
+        <tr><td>git add fayl</td><td>Bitta faylni staging'ga qo'shadi</td></tr>
+        <tr><td>git commit -m "xabar"</td><td>O'zgarishlarni tarixga saqlaydi</td></tr>
+        <tr><td>git push origin branch</td><td>GitHub'ga yuklaydi</td></tr>
+        <tr><td>git pull origin branch</td><td>GitHub'dan yuklab oladi</td></tr>
+        <tr><td>git branch</td><td>Branchlar ro'yxatini ko'rsatadi</td></tr>
+        <tr><td>git branch nom</td><td>Yangi branch yaratadi</td></tr>
+        <tr><td>git checkout nom</td><td>Boshqa branchga o'tadi</td></tr>
+        <tr><td>git checkout -b nom</td><td>Yangi branch yaratib o'tadi</td></tr>
+        <tr><td>git merge nom</td><td>Branch'ni birlashtiradi</td></tr>
+        <tr><td>git log --oneline</td><td>Commit tarixini ko'rsatadi</td></tr>
+        <tr><td>git diff</td><td>O'zgarishlarni ko'rsatadi</td></tr>
+        <tr><td>git stash</td><td>O'zgarishlarni vaqtincha saqlaydi</td></tr>
+        <tr><td>git stash pop</td><td>Saqlangan o'zgarishlarni qaytaradi</td></tr>
+        <tr><td>git remote -v</td><td>Remote'larni ko'rsatadi</td></tr>
+        <tr><td>git fetch --all</td><td>Barcha remote ma'lumotni yangilaydi</td></tr>
+        <tr><td>git reset --soft HEAD~1</td><td>Oxirgi commit'ni bekor qiladi</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>Git & GitHub Jamoaviy Ishlash Qo'llanmasi</p>
+  <p style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);">git commit -m "Muvaffaqiyatli o'rgandik! 🚀"</p>
+</footer>
+
+<script>
+// Copy button functionality
+function copyCode(btn) {
+  const codeBody = btn.closest('.code-block').querySelector('.code-body pre');
+  const text = codeBody.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'nusxalandi ✓';
+    btn.style.color = '#3fb950';
+    btn.style.borderColor = '#3fb950';
+    setTimeout(() => {
+      btn.textContent = 'nusxa';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  });
+}
+
+// Nav toggle close on link click
+document.querySelectorAll('.side-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelector('.side-nav').classList.remove('open');
+  });
+});
+
+// Close nav on outside click
+document.addEventListener('click', (e) => {
+  const nav = document.querySelector('.side-nav');
+  const toggle = document.querySelector('.nav-toggle');
+  if (nav.classList.contains('open') && !nav.contains(e.target) && !toggle.contains(e.target)) {
+    nav.classList.remove('open');
+  }
+});
+
+// Active nav highlighting on scroll
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.side-nav a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 100;
+    if (window.scrollY >= top) {
+      current = section.getAttribute('id');
+    }
+  });
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) {
+      link.classList.add('active');
+    }
+  });
+});
+</script>
+
+</body>
+</html>

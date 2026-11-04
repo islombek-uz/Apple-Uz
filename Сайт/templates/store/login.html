@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Hisobga kirish — Apple{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'home' %}">← Apple Store</a>
+  <div class="auth-panel">
+    <p class="eyebrow">Apple hisobi</p>
+    <h1 class="auth-title">Xush kelibsiz.</h1>
+    <p class="auth-intro">Xaridlaringiz va saqlangan ma’lumotlaringiz uchun hisobingizga kiring.</p>
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="auth-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="auth-help">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Kirish <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch auth-switch-plain"><a href="{% url 'password_reset_request' %}">Parolni unutdingizmi?</a></p>
+    <p class="auth-switch auth-switch-plain"><a href="{% url 'resend_verification' %}">Tasdiqlash kodi kelmadimi?</a></p>
+    {% include 'store/_social_login.html' %}
+    <p class="auth-switch">Yangi hisob kerakmi? <a href="{% url 'register' %}">Hisob yaratish</a></p>
+  </div>
+</section>
+{% endblock %}

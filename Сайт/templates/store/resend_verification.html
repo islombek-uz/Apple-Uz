@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Emailni tasdiqlash — Apple{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'login' %}">← Kirishga qaytish</a>
+  <div class="auth-panel">
+    <p class="eyebrow">Apple hisobi · Tasdiqlash</p>
+    <h1 class="auth-title">Yangi kod yuboramiz.</h1>
+    <p class="auth-intro">Ro‘yxatdan o‘tgan email manzilingizni kiriting. Hisob hali tasdiqlanmagan bo‘lsa, yangi kod yuboramiz.</p>
+    {% if email_uses_console %}<p class="site-notice">Email yuborish sozlanmagan: sinov kodi server terminalida ko‘rinadi, inboxga yuborilmaydi.</p>{% endif %}
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Yangi kod yuborish <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</section>
+{% endblock %}

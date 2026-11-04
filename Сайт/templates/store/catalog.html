@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Mahsulotlar — Apple Store{% endblock %}
+{% block content %}
+<section class="catalog-page" id="products">
+  <div class="catalog-heading">
+    <div><p class="eyebrow">Apple Store · Kolleksiya</p><h1>O‘zingizga mosini toping.</h1></div>
+    <p class="catalog-count">{{ products|length }} ta mahsulot</p>
+  </div>
+  <form class="catalog-filters" method="get" action="{% url 'home' %}">
+    <label class="search-control"><span class="sr-only">Mahsulot qidirish</span><input type="search" name="q" value="{{ search_query }}" placeholder="Mahsulot qidirish"></label>
+    <label class="filter-control"><span class="sr-only">Kategoriya</span><select name="category"><option value="">Barcha kategoriyalar</option>{% for category in categories %}<option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></label>
+    <button class="button button-dark filter-submit" type="submit">Filtrlash</button>
+    {% if search_query or selected_category %}<a class="filter-reset" href="{% url 'home' %}">Tozalash</a>{% endif %}
+  </form>
+  {% if products %}
+  <div class="product-grid catalog-grid">
+    {% for product in products %}
+    <article class="product-card">
+      <a class="catalog-product-image" href="{% url 'product_detail' product.slug %}" aria-label="{{ product.name }} haqida batafsil">
+        {% if product.badge %}<span class="product-badge">{{ product.badge }}</span>{% endif %}
+        <img src="{{ product.image_url }}" alt="{{ product.name }} mahsulot surati" loading="lazy">
+      </a>
+      <div class="product-info"><div><p class="product-category">{{ product.category }}</p><h2><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h2><p class="product-tagline">{{ product.tagline }}</p></div><div class="product-buy"><strong>{{ product.price_display }} so‘m</strong><button class="icon-buy add-to-bag" data-product="{{ product.name }}" data-price="{{ product.price }}" aria-label="{{ product.name }} savatga qo‘shish">+</button></div></div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="catalog-empty"><h2>Mahsulot topilmadi</h2><p>Qidiruv yoki kategoriya filtrini o‘zgartirib ko‘ring.</p><a class="button button-dark" href="{% url 'home' %}">Barcha mahsulotlar</a></div>
+  {% endif %}
+</section>
+{% endblock %}

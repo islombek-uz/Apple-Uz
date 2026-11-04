@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Hisob yaratish — Apple{% endblock %}
+{% block content %}
+<section class="account-section">
+  <a class="back-link" href="{% url 'home' %}">← Apple Store</a>
+  <div class="auth-panel">
+    <p class="eyebrow">Apple hisobi</p>
+    <h1 class="auth-title">Bir qadam qoldi.</h1>
+    <p class="auth-intro">Hisob yarating. Email manzilingizga tasdiqlash kodi yuboramiz.</p>
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="auth-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="auth-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="auth-help">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="button button-dark auth-submit" type="submit">Hisob yaratish <span aria-hidden="true">→</span></button>
+    </form>
+    {% include 'store/_social_login.html' %}
+    <p class="auth-switch">Hisobingiz bormi? <a href="{% url 'login' %}">Kirish</a></p>
+  </div>
+</section>
+{% endblock %}

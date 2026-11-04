@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Apple Store — qurilmalarni kashf eting{% endblock %}
+{% block content %}
+<section class="storefront-intro">
+  <div>
+    <p class="eyebrow">Apple Store · Yangi kolleksiya</p>
+    <h1>Sevimli texnologiyangiz shu yerdan boshlanadi.</h1>
+  </div>
+  <div class="store-help">
+    <span class="store-help-icon" aria-hidden="true">?</span>
+    <p>Tanlashda yordam kerakmi?</p>
+    <a href="{% url 'login' %}">Hisobingizga kiring <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<nav class="store-categories" aria-label="Mahsulot toifalari">
+  <a class="store-category-link {% if not selected_category %}is-selected{% endif %}" href="{% url 'home' %}">Hammasi</a>
+  {% for category in categories %}
+    <a class="store-category-link {% if category.slug == selected_category %}is-selected{% endif %}" href="{% url 'home' %}?category={{ category.slug }}">{{ category.name }}</a>
+  {% endfor %}
+</nav>
+
+<section class="store-latest" aria-labelledby="latest-title">
+  <div class="store-section-heading">
+    <div>
+      <p class="eyebrow">Yangi kelganlar</p>
+      <h2 id="latest-title">Kashf qilishga arziydi.</h2>
+    </div>
+    <form class="store-search" method="get" action="{% url 'home' %}">
+      {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+      <label class="sr-only" for="store-search-input">Mahsulot qidirish</label>
+      <input id="store-search-input" type="search" name="q" value="{{ search_query }}" placeholder="Mahsulot qidirish">
+      <button type="submit" aria-label="Qidirish">⌕</button>
+    </form>
+  </div>
+  {% if products %}
+    <div class="store-product-rail">
+      {% for product in products %}
+        <article class="store-product-card">
+          <a class="store-product-photo" href="{% url 'product_detail' product.slug %}" aria-label="{{ product.name }} tafsilotlari">
+            {% if product.badge %}<span class="store-product-badge">{{ product.badge }}</span>{% endif %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+          </a>
+          <div class="store-product-copy">
+            <p>{{ product.category }}</p>
+            <h3><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h3>
+            <span>{{ product.tagline }}</span>
+            <div class="store-product-bottom">
+              <strong>{{ product.price_display }} so‘m</strong>
+              <a class="store-product-arrow" href="{% url 'product_detail' product.slug %}" aria-label="{{ product.name }}ni ko‘rish">→</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="catalog-empty"><h2>Mahsulot topilmadi</h2><p>Boshqa nom yoki toifani qidirib ko‘ring.</p><a class="button button-dark" href="{% url 'home' %}">Katalogni ko‘rish</a></div>
+  {% endif %}
+</section>
+
+{% if hero_product %}
+<section class="store-spotlight">
+  <div class="store-spotlight-copy">
+    <p class="eyebrow">Apple Store tanlovi</p>
+    <h2>{{ hero_product.name }}</h2>
+    <p>{{ hero_product.tagline }}</p>
+    <a class="button button-light" href="{% url 'product_detail' hero_product.slug %}">Batafsil ko‘rish <span aria-hidden="true">→</span></a>
+  </div>
+  <img src="{{ hero_product.image_url }}" alt="{{ hero_product.name }} mahsuloti" loading="lazy">
+</section>
+{% endif %}
+
+<section class="store-assist" aria-label="Xarid qilish bo‘limlari">
+  <h2>Yaxshi tanlov uchun kerakli hammasi.</h2>
+  <div class="store-assist-grid">
+    <a href="{% url 'home' %}?category=iphone"><span aria-hidden="true">01</span><strong>Qurilmalarni solishtiring</strong><small>Toifalarni ko‘rib, sizga mosini tanlang.</small></a>
+    <a href="{% url 'home' %}?q=Apple"><span aria-hidden="true">02</span><strong>Yangi imkoniyatlarni toping</strong><small>Katalogdan mahsulot nomi bo‘yicha qidiring.</small></a>
+    <a href="{% url 'login' %}"><span aria-hidden="true">03</span><strong>Hisobingizni boshqaring</strong><small>Kiring yoki yangi hisob yarating.</small></a>
+  </div>
+</section>
+{% endblock %}

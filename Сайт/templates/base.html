@@ -1,0 +1,66 @@
+{% load static %}
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>{% block title %}Apple — o'zingizga mosini toping{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'store/site.css' %}">
+  <link rel="stylesheet" href="{% static 'store/auth.css' %}?v=3">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Asosiy navigatsiya">
+      <a class="brand" href="{% url 'home' %}" aria-label="Apple bosh sahifa">
+        <svg class="brand-logo" viewBox="0 0 450 450" role="img" aria-hidden="true">
+          <path d="M231 165c24 0 39-12 63-12 30 0 55 12 72 31-29 1-50 21-50 49 0 31 24 52 54 54-11 50-40 108-71 122-22 11-36-7-61-7s-43 18-65 6C128 388 87 315 87 255c0-59 35-98 83-98 26 0 46 12 61 8Z"/>
+          <path class="brand-leaf" d="M237 143c0-25 11-49 33-67 14-11 30-17 46-19-1 22-8 45-23 61-15 16-36 25-56 25Z"/>
+        </svg>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-label="Menyuni ochish"><span></span><span></span></button>
+      <div class="nav-links">
+        {% if user.is_authenticated %}
+          <a href="{% url 'home' %}">Mahsulotlar</a>
+          <a href="{% url 'home' %}?category=iphone">iPhone</a><a href="{% url 'home' %}?category=mac">Mac</a><a href="{% url 'home' %}?category=ipad">iPad</a><a href="{% url 'home' %}?category=watch">Watch</a>
+          <form class="nav-auth-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="nav-auth-link" type="submit">Chiqish</button></form>
+        {% else %}
+          <a href="{% url 'home' %}#latest-title">Do‘kon</a><a class="nav-auth-link" href="{% url 'login' %}">Kirish</a><a class="nav-auth-link" href="{% url 'register' %}">Ro‘yxatdan o‘tish</a>
+        {% endif %}
+      </div>
+      <div class="nav-actions">
+        {% if user.is_authenticated %}{% with profile=user.profiles.first %}
+        <a class="nav-profile-link" href="{% url 'profile' %}" aria-label="Profil" title="Profil">
+          {% if profile and profile.avatar %}
+            <img class="nav-avatar" src="{{ profile.avatar.url }}" alt="Profil rasmi">
+          {% else %}
+            <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+          {% endif %}
+        </a>
+        {% endwith %}{% else %}
+        <a class="nav-profile-link" href="{% url 'login' %}" aria-label="Hisobga kirish" title="Hisobga kirish">
+          <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+        </a>
+        {% endif %}
+        <button class="bag-button" type="button" aria-label="Savat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span class="bag-count" aria-live="polite">0</span></button>
+      </div>
+    </nav>
+  </header>
+  {% if messages %}
+    <div class="site-notices" aria-live="polite">
+      {% for message in messages %}
+        <div class="site-notice site-notice--{{ message.tags }}" role="status">
+          <span class="site-notice-icon" aria-hidden="true"></span>
+          <p>{{ message }}</p>
+          <button class="site-notice-dismiss" type="button" aria-label="Xabarni yopish">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="site-footer" id="support">
+    <div class="footer-inner"><p>Apple mahsulotlari. Katta g'oyalar uchun.</p><div><a href="{% url 'home' %}">Apple</a><span>© 2026 Apple. Barcha huquqlar himoyalangan.</span></div></div>
+  </footer>
+  <script src="{% static 'store/site.js' %}?v=2" defer></script>
+</body>
+</html>
