@@ -1,4 +1,4 @@
-.nav-auth-form { margin: 0; }
+`.nav-auth-form { margin: 0; }
 .nav-auth-link { padding: 0; border: 0; background: transparent; color: #3a3a3c; font: inherit; font-size: 12px; cursor: pointer; }
 .nav-auth-link:hover { color: var(--blue); }
 .site-notices { position: fixed; z-index: 200; top: 78px; right: 24px; display: grid; width: min(420px, calc(100vw - 32px)); gap: 10px; pointer-events: none; }
