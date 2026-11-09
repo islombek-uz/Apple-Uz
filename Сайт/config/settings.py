@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "islombek77vip.pythonanywhere.com,127.0.0.1,localhost").split(",")
     if host.strip()
 ]
 
