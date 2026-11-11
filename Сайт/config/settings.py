@@ -25,11 +25,27 @@ load_env_file()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
+APP_HOST = os.getenv("APP_HOST", "islombek77vip.pythonanywhere.com")
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "islombek77vip.pythonanywhere.com,127.0.0.1,localhost").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", f"{APP_HOST},127.0.0.1,localhost").split(",")
     if host.strip()
 ]
+
+# Required for PythonAnywhere / HTTPS proxy deployments. Without this, Google OAuth
+# callback requests can be rejected during the CSRF/redirect round trip.
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+if csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{APP_HOST}",
+        f"https://www.{APP_HOST}",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SITE_ID = 1
 
 INSTALLED_APPS = [
     "jazzmin",

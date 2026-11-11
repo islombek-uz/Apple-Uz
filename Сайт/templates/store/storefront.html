@@ -3,13 +3,44 @@
 {% block content %}
 <section class="storefront-intro">
   <div>
-    <p class="eyebrow">Apple Store · Yangi kolleksiya</p>
-    <h1>Sevimli texnologiyangiz shu yerdan boshlanadi.</h1>
+    <p class="eyebrow">APPLE STORE · PREMIUM TEXNOLOGIYA</p>
+    <h1>Smarter everyday essentials.</h1>
   </div>
   <div class="store-help">
     <span class="store-help-icon" aria-hidden="true">?</span>
     <p>Tanlashda yordam kerakmi?</p>
     <a href="{% url 'login' %}">Hisobingizga kiring <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<section class="storefront-hero" aria-label="Brand hero section">
+  <div class="storefront-hero-copy">
+    <p class="eyebrow eyebrow--green">Yangi avlod texnologiyasi</p>
+    <h2>Apple bilan har kunlik ish va dam olish yanada silliq bo‘ladi.</h2>
+    <p class="storefront-hero-text">iPhone, Mac, iPad, Watch va AirPods uchun tanlangan, kuchli va minimal dizayndagi mahsulotlar. Mavjud vaqtni tejaydigan, sifatli va qulay yechimlar.</p>
+    <div class="storefront-hero-actions">
+      <a class="button button-dark" href="#latest-title">Mahsulotlarni ko‘rish</a>
+      <a class="button button-outline" href="{% url 'login' %}">Hisob yaratish</a>
+    </div>
+    <ul class="storefront-metrics" aria-label="Brand metrics">
+      <li><strong>24h</strong><span>yetkazib berish</span></li>
+      <li><strong>4.9/5</strong><span>mijoz bahosi</span></li>
+      <li><strong>1k+</strong><span>muvaffaqiyatli buyurtma</span></li>
+    </ul>
+  </div>
+  <div class="storefront-hero-visual" aria-hidden="true">
+    <div class="hero-device-card">
+      <span class="device-badge">New</span>
+      <img
+        class="hero-real-product-image"
+        src="{% if hero_product %}{{ hero_product.image_url }}{% elif products %}{{ products.0.image_url }}{% endif %}"
+        alt="{% if hero_product %}{{ hero_product.name }}{% elif products %}{{ products.0.name }}{% endif %}"
+      >
+      <div class="hero-device-info">
+        <strong>{% if hero_product %}{{ hero_product.name }}{% elif products %}{{ products.0.name }}{% else %}iPhone Pro{% endif %}</strong>
+        <span>{% if hero_product %}{{ hero_product.tagline }}{% elif products %}{{ products.0.tagline }}{% else %}ProMotion • A18 • Titanium{% endif %}</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -19,6 +50,24 @@
     <a class="store-category-link {% if category.slug == selected_category %}is-selected{% endif %}" href="{% url 'home' %}?category={{ category.slug }}">{{ category.name }}</a>
   {% endfor %}
 </nav>
+
+<section class="store-brand-grid" aria-label="Apple Store advantages">
+  <article>
+    <span>01</span>
+    <h3>Texnologiya va qulaylik</h3>
+    <p>Har bir mahsulot ishlash, qulaylik va estetikani bir joyga birlashtiradi.</p>
+  </article>
+  <article>
+    <span>02</span>
+    <h3>Fast delivery</h3>
+    <p>Zayavkalarni tezkor ishlov berish va yetkazib berish orqali qulay xaridni ta’minlaymiz.</p>
+  </article>
+  <article>
+    <span>03</span>
+    <h3>Premium xayriya</h3>
+    <p>Mahsulotlarni expertlar tavsiyasi bilan tanlash, topish va xarid qilish osonroq.</p>
+  </article>
+</section>
 
 <section class="store-latest" aria-labelledby="latest-title">
   <div class="store-section-heading">
