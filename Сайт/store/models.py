@@ -1,9 +1,11 @@
+import html
 import json
 import os
 import urllib.parse
 import urllib.request
 
 from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 
@@ -39,6 +41,8 @@ class Product(models.Model):
     name = models.CharField("Nomi", max_length=120)
     slug = models.SlugField("Slug", max_length=120, unique=True)
     tagline = models.CharField("Qisqa tavsif", max_length=180)
+    description = models.TextField("Batafsil tavsif", blank=True)
+    highlights = models.JSONField("Muhim jihatlar", default=dict, blank=True)
     image_url = models.URLField("Mahsulot rasmi URL manzili", blank=True)
     price = models.PositiveBigIntegerField("Narxi (so'm)")
     color = models.CharField("Rang kodi", max_length=7, default="#c7c7c4")
@@ -158,7 +162,9 @@ def notify_registration_to_admin(user, source="site", telegram_data=None):
         )
     )
 
-    admin_chat_id = os.environ.get("ADMIN_CHAT_ID", "8803005871")
+    admin_chat_id = os.environ.get("ADMIN_CHAT_ID")
+    if not admin_chat_id:
+        return None
     user_name = getattr(user, "username", "") or "-"
     email = getattr(user, "email", "") or "-"
     first_name = profile.first_name or "-"
@@ -185,6 +191,32 @@ def get_profile_for_user(user):
     if profile is None:
         profile = Profile.objects.create(user=user)
     return profile
+
+
+def notify_order_completed(order):
+    subject = f"Buyurtma #{order.pk} yetib keldi"
+    message = (
+        f"Hurmatli {order.first_name},\n\n"
+        f"#{order.pk}-sonli buyurtmangiz yetib keldi. Xaridingiz uchun rahmat!"
+    )
+    if order.email:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [order.email],
+            fail_silently=True,
+        )
+
+    if order.user_id:
+        profile = Profile.objects.filter(user_id=order.user_id).order_by("pk").first()
+        if profile and profile.telegram_chat_id:
+            telegram_message = (
+                f"<b>Buyurtmangiz yetib keldi</b>\n"
+                f"Buyurtma: #{order.pk}\n"
+                f"Hurmatli {html.escape(order.first_name)}, xaridingiz uchun rahmat!"
+            )
+            send_telegram_message(profile.telegram_chat_id, telegram_message)
 
 
 class Order(models.Model):
@@ -228,6 +260,20 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Buyurtma #{self.pk} — {self.first_name} {self.last_name}".strip()
+
+    def save(self, *args, **kwargs):
+        previous_status = None
+        if self.pk:
+            previous_status = (
+                type(self).objects.filter(pk=self.pk)
+                .values_list("status", flat=True)
+                .first()
+            )
+
+        super().save(*args, **kwargs)
+
+        if previous_status != "completed" and self.status == "completed":
+            notify_order_completed(self)
 
     @property
     def total_display(self):

@@ -13,4 +13,13 @@
     <span>Google orqali davom etish</span>
   </a>
   {% endif %}
+  {% if social_auth.telegram %}
+  <form method="post" action="{% url 'telegram_login' %}?process=login">
+    {% csrf_token %}
+    <button class="social-button" type="submit">
+      <span aria-hidden="true">➤</span>
+      <span>Telegram orqali davom etish</span>
+    </button>
+  </form>
+  {% endif %}
 </div>

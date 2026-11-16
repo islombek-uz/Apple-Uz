@@ -21,6 +21,7 @@
 .auth-title { margin: 0; font-size: clamp(32px, 3.2vw, 42px); line-height: 1.05; letter-spacing: -.05em; font-weight: 650; }
 .auth-intro { margin: 14px 0 26px; color: var(--muted); font-size: 15px; line-height: 1.55; }
 .auth-intro strong { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.auth-code-preview { white-space: nowrap; }
 .auth-form { display: grid; gap: 17px; }
 .auth-field { display: grid; gap: 7px; }
 .auth-field label { color: #424245; font-size: 13px; font-weight: 550; }

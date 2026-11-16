@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -23,8 +25,24 @@ def load_env_file():
 
 load_env_file()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if DEBUG and not SECRET_KEY:
+    SECRET_KEY = "django-insecure-local-development-only"
+elif not DEBUG and (
+    len(SECRET_KEY) < 50
+    or SECRET_KEY.startswith("django-insecure-")
+    or "replace-with" in SECRET_KEY.lower()
+):
+    raise ImproperlyConfigured(
+        "Set SECRET_KEY to a generated random value of at least 50 characters when DEBUG=False."
+    )
+
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", str(not DEBUG)).lower() in {
+    "1", "true", "yes", "on"
+}
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 APP_HOST = os.getenv("APP_HOST", "islombek77vip.pythonanywhere.com")
 ALLOWED_HOSTS = [
     host.strip()

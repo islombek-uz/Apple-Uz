@@ -1,18 +1,28 @@
 import json
 from io import BytesIO
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.admin.sites import AdminSite
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import RequestFactory
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
 
-from .models import Order, OrderItem, Product, Profile, get_profile_for_user
+from .admin import OrderAdmin
+from .models import (
+    Order,
+    OrderItem,
+    Product,
+    Profile,
+    get_profile_for_user,
+    notify_registration_to_admin,
+)
 
 
 class StorefrontTests(TestCase):
@@ -27,7 +37,7 @@ class StorefrontTests(TestCase):
         response = self.client.get(reverse("home"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Sevimli texnologiyangiz shu yerdan boshlanadi.")
+        self.assertContains(response, "Apple bilan har kunlik ish va dam olish yanada silliq bo‘ladi.")
         self.assertContains(response, "MacBook Air")
         self.assertContains(response, "/product/iphone-17-pro/")
 
@@ -141,6 +151,8 @@ class StorefrontTests(TestCase):
         self.assertContains(response, "iPad Pro")
         self.assertContains(response, "12 999 000")
         self.assertContains(response, "specification-table")
+        self.assertContains(response, "Muhim jihatlari")
+        self.assertContains(response, "Ko‘ngilochar kontent")
         self.assertContains(response, "images.unsplash.com")
 
     def test_product_detail_requires_login(self):
@@ -170,6 +182,32 @@ class StorefrontTests(TestCase):
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class AccountTests(TestCase):
+    @patch("store.models.send_telegram_message")
+    @patch("store.models.send_mail")
+    def test_order_completion_notifies_customer_only_once(self, mock_send_mail, mock_telegram):
+        user = get_user_model().objects.create_user(
+            username="order-customer",
+            email="customer@example.com",
+            password="test-pass-123",
+        )
+        Profile.objects.create(user=user, telegram_chat_id=123456789)
+        order = Order.objects.create(
+            user=user,
+            first_name="Customer",
+            email=user.email,
+            phone="+998901234567",
+        )
+        order_admin = OrderAdmin(Order, AdminSite())
+        request = RequestFactory().post("/admin/store/order/")
+
+        order.status = "completed"
+        order_admin.save_model(request, order, form=None, change=True)
+        order_admin.save_model(request, order, form=None, change=True)
+
+        mock_send_mail.assert_called_once()
+        self.assertEqual(mock_send_mail.call_args.args[3], [user.email])
+        mock_telegram.assert_called_once_with(123456789, ANY)
+
     def test_user_can_have_multiple_profiles_but_app_uses_first(self):
         user = get_user_model().objects.create_user(
             username="multiple-profile-user", password="test-pass-123"
@@ -190,6 +228,8 @@ class AccountTests(TestCase):
         )
 
         self.assertTrue(user.pk)
+        with patch.dict("os.environ", {"ADMIN_CHAT_ID": "8803005871"}):
+            notify_registration_to_admin(user, source="site")
         mock_send.assert_called_once()
         args = mock_send.call_args.args
         self.assertEqual(args[0], "8803005871")
@@ -331,6 +371,26 @@ class AccountTests(TestCase):
         self.assertRegex(profile.activation_code, r"^\d{6}$")
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(profile.activation_code, mail.outbox[0].body)
+
+    def test_verification_page_shows_code_only_in_debug(self):
+        user = get_user_model().objects.create_user(
+            username="debug-code-customer",
+            email="debug-code@example.com",
+            password="Strong-Apple-Password-874!",
+            is_active=False,
+        )
+        Profile.objects.create(user=user, activation_code="123456")
+        session = self.client.session
+        session["verify_email"] = user.email
+        session.save()
+
+        with override_settings(DEBUG=True):
+            response = self.client.get(reverse("verify_code"))
+            self.assertContains(response, "Kod: <strong>123456</strong>")
+
+        with override_settings(DEBUG=False):
+            response = self.client.get(reverse("verify_code"))
+            self.assertNotContains(response, "123456")
 
     def test_verification_activates_and_logs_in_user(self):
         user = get_user_model().objects.create_user(

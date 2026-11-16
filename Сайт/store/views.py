@@ -177,7 +177,11 @@ def verify_code_page(request):
     return render(
         request,
         "store/verify_code.html",
-        {"form": form, "email": email},
+        {
+            "form": form,
+            "email": email,
+            "debug_code": profile.activation_code if settings.DEBUG else "",
+        },
     )
 
 

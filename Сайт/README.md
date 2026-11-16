@@ -40,4 +40,17 @@ Ijtimoiy login tugmalari login va ro‘yxatdan o‘tish sahifalarida doim ko‘r
 
 `.env` faylida credential’lar bo‘sh qolsa, login tugmasi sozlash bo‘yicha ko‘rsatmani ochadi.
 
+## Telegram botni ishga tushirish
+
+Root papkadan botni ishga tushiring. Bot tokeni root `.env` yoki `Сайт/.env` faylida `TELEGRAM_BOT_TOKEN` nomi bilan bo‘lishi kerak:
+
+```powershell
+.\Сайт\.venv\Scripts\python.exe .\Сайт\manage.py migrate
+.\Сайт\.venv\Scripts\python.exe .\Бот\telegram_bot.py
+```
+
+Bot polling ishlatadi, shu sababli boshqa bot jarayoni yoki webhook ayni tokenni ishlatmasligi kerak. Ishga tushirishda webhook ziddiyati chiqsa, eski webhook’ni o‘chirib, webhook ishlatayotgan boshqa jarayonni to‘xtating va botni qayta ishga tushiring. Production’da saytning public HTTPS manzilini `SITE_URL` qilib belgilang.
+
+Production’da `.env` ichida `DEBUG=False` qilib, kamida 50 belgili tasodifiy `SECRET_KEY` yarating va saytni HTTPS orqali xizmat qiling. `DEBUG=False` bo‘lganda HTTPS’ga yo‘naltirish hamda session/CSRF secure cookie’lari avtomatik yoqiladi. HSTS’ni faqat butun domen HTTPS’da ishlashiga ishonch hosil qilgandan keyin yoqing.
+
 Allauth migration’lari ham odatdagi `py manage.py migrate` buyrug‘i bilan qo‘llanadi.

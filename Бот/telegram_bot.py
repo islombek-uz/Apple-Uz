@@ -30,7 +30,6 @@ def load_env_file():
 load_env_file()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
-ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID", "8803005871")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}" if BOT_TOKEN else ""
 CATALOG_PAGE_SIZE = 5
 CATALOG_STATE = {}
@@ -78,7 +77,17 @@ def api_request(method, payload=None):
 
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     with urllib.request.urlopen(request, timeout=40) as response:
-        return json.loads(response.read().decode("utf-8"))
+        result = json.loads(response.read().decode("utf-8"))
+
+    if not isinstance(result, dict):
+        raise RuntimeError(f"Telegram API {method} returned an invalid response")
+    if not result.get("ok"):
+        error_code = result.get("error_code", "unknown")
+        description = result.get("description", "No error description")
+        raise RuntimeError(
+            f"Telegram API {method} failed ({error_code}): {description}"
+        )
+    return result
 
 
 def send_message(chat_id, text, reply_markup=None):
@@ -98,6 +107,25 @@ def get_updates(offset=None):
     if offset is not None:
         payload["offset"] = offset
     return api_request("getUpdates", payload)
+
+
+def validate_startup():
+    bot_info = api_request("getMe").get("result") or {}
+    if not bot_info.get("id"):
+        raise RuntimeError("Telegram getMe returned no bot identity")
+
+    webhook = api_request("getWebhookInfo").get("result") or {}
+    if webhook.get("url"):
+        raise RuntimeError(
+            "Telegram webhook is active. Disable the webhook before starting this polling bot."
+        )
+
+    if not profile_has_telegram_fields():
+        raise RuntimeError(
+            "The site database is unavailable or missing Telegram profile fields. "
+            "Run 'py Сайт/manage.py migrate' before starting the bot."
+        )
+    return bot_info
 
 
 
@@ -306,8 +334,9 @@ def handle_message(message):
         return
 
     lower = text.lower()
+    command = lower.split(maxsplit=1)[0].split("@", 1)[0]
     reply_markup = None
-    if lower in {"/start", "/start@my_store_bot"}:
+    if command == "/start":
         from store.models import Profile
 
         profile = Profile.objects.filter(telegram_chat_id=chat_id).first()
@@ -323,16 +352,16 @@ def handle_message(message):
                 "Ism|haqiqiy email manzilingiz\n\n"
                 "Namuna email manzillar ro'yxatdan o'tkazilmaydi."
             )
-    elif lower in {"/help", "/help@my_store_bot"}:
+    elif command == "/help":
         response = (
             "Quyidagi buyruqlardan foydalaning:\n"
             "/catalog — mahsulotlarni ko'rish\n"
             "/site — saytga o'tish\n"
             "yoki mahsulot nomini yozing, masalan: iPhone"
         )
-    elif lower in {"/catalog", "/catalog@my_store_bot"}:
+    elif command == "/catalog":
         response, reply_markup = catalog_page(chat_id)
-    elif lower in {"/site", "/site@my_store_bot"}:
+    elif command == "/site":
         response = f"🌐 Do'kon sayti: {html.escape(os.environ.get('SITE_URL', 'http://127.0.0.1:8000'))}"
     else:
         if "|" in text:
@@ -367,7 +396,8 @@ def main():
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN is not set. Add TELEGRAM_BOT_TOKEN or BOT_TOKEN in .env")
 
-    print("Bot started. Waiting for new Telegram messages...")
+    bot_info = validate_startup()
+    print(f"Bot @{bot_info.get('username', 'unknown')} started. Waiting for updates...")
     last_update_id = None
 
     while True:
