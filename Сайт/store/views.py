@@ -409,15 +409,28 @@ def profile_page(request):
         form = ProfileAvatarForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            messages.success(request, "Profil ma’lumotlari saqlandi.")
+            messages.success(request, "Hisob ma’lumotlari saqlandi.")
             return redirect("profile")
     else:
         form = ProfileAvatarForm(instance=profile)
 
+    orders = list(
+        request.user.orders.select_related("user").prefetch_related("items").all()
+    )
+    total_spent = sum(
+        order.total_price for order in orders if order.status != "cancelled"
+    )
     return render(
         request,
         "store/profile.html",
-        {"form": form, "profile": profile},
+        {
+            "form": form,
+            "profile": profile,
+            "orders": orders,
+            "orders_count": len(orders),
+            "total_spent_display": f"{total_spent:,}".replace(",", " "),
+            "last_order_date": orders[0].created_at if orders else None,
+        },
     )
 
 

@@ -114,16 +114,23 @@ class ProfileAvatarForm(forms.ModelForm):
         max_length=500,
         widget=forms.Textarea(attrs={"class": "auth-input", "rows": 4, "placeholder": "O'zingiz haqida qisqa ma'lumot..."}),
     )
+    remove_avatar = forms.BooleanField(
+        label="Joriy rasmni o‘chirish",
+        required=False,
+    )
 
     class Meta:
         model = Profile
         fields = ("avatar",)
         widgets = {
-            "avatar": forms.ClearableFileInput(attrs={"class": "auth-input"})
+            "avatar": forms.FileInput(
+                attrs={"class": "account-file-input", "accept": "image/*"}
+            )
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["avatar"].label = "Shaxsiy rasm"
         if self.instance and self.instance.pk:
             self.fields["first_name"].initial = self.instance.first_name
             self.fields["last_name"].initial = self.instance.last_name
@@ -136,6 +143,9 @@ class ProfileAvatarForm(forms.ModelForm):
         profile.last_name = self.cleaned_data.get("last_name", "").strip()
         profile.phone = self.cleaned_data.get("phone", "").strip()
         profile.bio = self.cleaned_data.get("bio", "").strip()
+        if self.cleaned_data.get("remove_avatar"):
+            profile.avatar.delete(save=False)
+            profile.avatar = ""
         if commit:
             profile.save()
         return profile
@@ -196,7 +206,7 @@ class EmailChangeForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data["email"].strip()
         if email.casefold() == (self.user.email or "").casefold():
-            raise forms.ValidationError("Bu email manzili profilingizda allaqachon ishlatilmoqda.")
+            raise forms.ValidationError("Bu email manzili hisobingizda allaqachon ishlatilmoqda.")
         if User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
             raise forms.ValidationError("Bu email manzili allaqachon ro‘yxatdan o‘tgan.")
         return email

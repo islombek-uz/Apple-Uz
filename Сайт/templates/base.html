@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f5f7">
   <title>{% block title %}Apple — o'zingizga mosini toping{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'store/site.css' %}">
-  <link rel="stylesheet" href="{% static 'store/auth.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'store/site.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'store/auth.css' %}?v=4">
 </head>
 <body>
   <header class="site-header">
@@ -30,16 +30,17 @@
       </div>
       <div class="nav-actions">
         {% if user.is_authenticated %}{% with profile=user.profiles.first %}
-        <a class="nav-profile-link" href="{% url 'profile' %}" aria-label="Profil" title="Profil">
+        <a class="nav-account-link nav-account-button" href="{% url 'profile' %}" aria-label="Hisobimga o‘tish" title="Hisobimga o‘tish">
           {% if profile and profile.avatar %}
-            <img class="nav-avatar" src="{{ profile.avatar.url }}" alt="Profil rasmi">
+            <img class="nav-avatar" src="{{ profile.avatar.url }}" alt="Foydalanuvchi rasmi">
           {% else %}
-            <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+            <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Foydalanuvchi rasmi">
           {% endif %}
+          <span>Hisobim</span>
         </a>
         {% endwith %}{% else %}
-        <a class="nav-profile-link" href="{% url 'login' %}" aria-label="Hisobga kirish" title="Hisobga kirish">
-          <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+        <a class="nav-account-link" href="{% url 'login' %}" aria-label="Hisobga kirish" title="Hisobga kirish">
+          <img class="nav-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Foydalanuvchi rasmi">
         </a>
         {% endif %}
         <button class="bag-button" type="button" aria-label="Savat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span class="bag-count" aria-live="polite">0</span></button>

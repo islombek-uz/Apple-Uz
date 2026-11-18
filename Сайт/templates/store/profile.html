@@ -1,35 +1,138 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Profil — Apple{% endblock %}
+{% block title %}Hisobim — Apple{% endblock %}
 {% block content %}
-<section class="account-section profile-section">
+<section class="account-page">
   <a class="back-link" href="{% url 'home' %}">← Apple Store</a>
-  <div class="profile-panel">
-    <p class="eyebrow">Apple hisobi</p>
-    <h1 class="auth-title">Profilingiz.</h1>
-    <div class="profile-summary">
+
+  <header class="account-hero">
+    <div class="account-hero-main">
       {% if profile.avatar %}
-        <img class="profile-avatar" src="{{ profile.avatar.url }}" alt="Profil rasmi">
+        <img class="account-avatar" src="{{ profile.avatar.url }}" alt="Foydalanuvchi rasmi">
       {% else %}
-        <img class="profile-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Anonim profil rasmi">
+        <img class="account-avatar" src="{% static 'store/avatar-default.svg' %}" alt="Foydalanuvchi rasmi">
       {% endif %}
-      <div>
-        <h2>{{ request.user.username }}</h2>
-        <p>{{ request.user.email|default:'Email ko‘rsatilmagan' }}</p>
-        <a class="text-button" href="{% url 'change_email' %}">Emailni o‘zgartirish</a>
+      <div class="account-identity">
+        <p class="eyebrow">Apple hisobi</p>
+        <h1 class="account-title">{{ request.user.username }}</h1>
+        <p class="account-email">{{ request.user.email|default:'Email ko‘rsatilmagan' }}</p>
+        <p class="account-meta"><span class="account-meta-dot" aria-hidden="true"></span>A’zo bo‘lgan: {{ request.user.date_joined|date:"j E Y" }}</p>
       </div>
     </div>
-    <form class="auth-form profile-form" method="post" enctype="multipart/form-data" novalidate>
-      {% csrf_token %}
-      {% for field in form %}
-      <div class="auth-field">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+    <dl class="account-stats">
+      <div class="account-stat">
+        <dt>Buyurtmalar</dt>
+        <dd>{{ orders_count }}</dd>
       </div>
-      {% endfor %}
-      <button class="button button-dark auth-submit" type="submit">Profilni saqlash <span aria-hidden="true">→</span></button>
-    </form>
+      <div class="account-stat">
+        <dt>Jami xarid</dt>
+        <dd>{{ total_spent_display }} <span>so‘m</span></dd>
+      </div>
+      <div class="account-stat">
+        <dt>Oxirgi xarid</dt>
+        <dd class="account-stat-date">{% if last_order_date %}{{ last_order_date|date:"j E Y" }}{% else %}—{% endif %}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="account-columns">
+    <section class="account-card" aria-labelledby="account-settings-heading">
+      <div class="account-card-head">
+        <p class="eyebrow">Sozlamalar</p>
+        <h2 id="account-settings-heading">Shaxsiy ma’lumotlar</h2>
+      </div>
+
+      <div class="account-email-row">
+        <div>
+          <span class="account-row-label">Email manzili</span>
+          <strong>{{ request.user.email|default:'Ko‘rsatilmagan' }}</strong>
+        </div>
+        <a class="text-button" href="{% url 'change_email' %}">Emailni o‘zgartirish</a>
+      </div>
+
+      <form class="auth-form account-form" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="auth-field account-avatar-field">
+          <label for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}</label>
+          <div class="account-avatar-edit">
+            <img class="account-avatar-thumb" src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'store/avatar-default.svg' %}{% endif %}" alt="">
+            <div class="account-avatar-controls">
+              {{ form.avatar }}
+              {% if profile.avatar %}
+              <label class="account-checkbox">{{ form.remove_avatar }} Joriy rasmni o‘chirish</label>
+              {% endif %}
+            </div>
+          </div>
+          {% for error in form.avatar.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        {% for field in form.visible_fields %}{% if field.name != 'avatar' and field.name != 'remove_avatar' %}
+        <div class="auth-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="auth-help">{{ field.help_text|safe }}</p>{% endif %}
+          {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}{% endfor %}
+        {% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        <button class="button button-dark auth-submit" type="submit">Saqlash <span aria-hidden="true">→</span></button>
+      </form>
+    </section>
+
+    <section class="account-history" aria-labelledby="account-history-heading">
+      <div class="account-history-head">
+        <div>
+          <p class="eyebrow">Tarix</p>
+          <h2 id="account-history-heading">Xaridlar tarixi</h2>
+        </div>
+        <p class="account-history-count">{{ orders_count }} ta buyurtma</p>
+      </div>
+
+      {% if orders %}
+      <ol class="account-history-list">
+        {% for order in orders %}
+        <li class="account-order">
+          <span class="account-order-dot" aria-hidden="true"></span>
+          <div class="account-order-head">
+            <div class="account-order-title">
+              <h3>Buyurtma №{{ order.pk }}</h3>
+              <time datetime="{{ order.created_at|date:'c' }}">{{ order.created_at|date:"j E Y" }} · {{ order.created_at|date:"H:i" }}</time>
+            </div>
+            {% if order.status == 'completed' %}
+              <span class="order-status order-status--completed">Keldi</span>
+            {% elif order.status == 'cancelled' %}
+              <span class="order-status order-status--cancelled">Bekor qilindi</span>
+            {% elif order.status == 'shipped' %}
+              <span class="order-status order-status--shipped">Yo‘lda</span>
+            {% elif order.status == 'confirmed' %}
+              <span class="order-status order-status--confirmed">Tasdiqlangan</span>
+            {% else %}
+              <span class="order-status">Kutilmoqda</span>
+            {% endif %}
+          </div>
+          <ul class="account-order-items">
+            {% for item in order.items.all %}
+            <li>
+              <span class="account-item-name">{{ item.product_name }}<em>× {{ item.quantity }}</em></span>
+              <strong>{{ item.subtotal_display }} so‘m</strong>
+            </li>
+            {% endfor %}
+          </ul>
+          <div class="account-order-foot">
+            <span>{{ order.get_payment_method_display }}</span>
+            <strong>Jami: {{ order.total_display }} so‘m</strong>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <div class="account-history-empty">
+        <span class="account-empty-icon" aria-hidden="true"></span>
+        <h3>Hozircha xaridlar yo‘q</h3>
+        <p>Biror mahsulot tanlang — buyurtmalaringiz shu yerda sana va holati bilan ko‘rinadi.</p>
+        <a class="button button-dark" href="{% url 'home' %}#latest-title">Xarid qilish</a>
+      </div>
+      {% endif %}
+    </section>
   </div>
 </section>
 {% endblock %}

@@ -29,7 +29,7 @@ class StorefrontTests(TestCase):
     def test_guest_nav_shows_default_avatar_linked_to_login(self):
         response = self.client.get(reverse("home"))
 
-        self.assertContains(response, 'class="nav-profile-link"')
+        self.assertContains(response, 'class="nav-account-link"')
         self.assertContains(response, 'href="/login/" aria-label="Hisobga kirish"')
         self.assertContains(response, "avatar-default.svg")
 
@@ -248,7 +248,8 @@ class AccountTests(TestCase):
 
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, "avatar-default.svg")
-            self.assertContains(response, 'class="nav-profile-link"')
+            self.assertContains(response, 'class="nav-account-link nav-account-button"')
+            self.assertContains(response, 'href="/account/profile/"')
             self.assertContains(response, "Emailni o‘zgartirish")
 
             image_data = BytesIO()
@@ -578,6 +579,97 @@ class AccountTests(TestCase):
         self.assertEqual(profile.code_attempts, Profile.MAX_CODE_ATTEMPTS)
         self.assertFalse(user.is_active)
         self.assertContains(response, "Urinishlar limiti tugadi")
+
+    def test_profile_page_shows_user_purchase_history_and_delivery_status(self):
+        user = get_user_model().objects.create_user(
+            username="history-customer",
+            email="history@example.com",
+            password="test-pass-123",
+        )
+        other_user = get_user_model().objects.create_user(
+            username="other-customer",
+            email="other@example.com",
+            password="test-pass-123",
+        )
+        product = Product.objects.get(slug="iphone-17-pro")
+
+        order = Order.objects.create(
+            user=user,
+            first_name="History",
+            email=user.email,
+            phone="+998901234567",
+            total_price=product.price,
+            status="completed",
+        )
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            product_name=product.name,
+            product_price=product.price,
+            quantity=1,
+        )
+        other_order = Order.objects.create(
+            user=other_user,
+            first_name="Other",
+            email=other_user.email,
+            phone="+998901111111",
+            total_price=1,
+            status="shipped",
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(response, "Xaridlar tarixi")
+        self.assertContains(response, product.name)
+        self.assertContains(response, "Keldi")
+        self.assertContains(response, f"Buyurtma №{order.pk}")
+        self.assertContains(response, order.created_at.strftime("%Y-%m-%d"))
+        self.assertContains(response, "Jami xarid")
+        self.assertNotContains(response, f"Buyurtma №{other_order.pk}")
+
+    def test_profile_page_shows_empty_purchase_history(self):
+        user = get_user_model().objects.create_user(
+            username="empty-history",
+            email="empty-history@example.com",
+            password="test-pass-123",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(response, "Hozircha xaridlar yo‘q")
+        self.assertContains(response, "Buyurtmalar</dt>")
+
+    def test_profile_page_never_shows_the_word_profil(self):
+        user = get_user_model().objects.create_user(
+            username="no-profil-word",
+            email="no-profil@example.com",
+            password="test-pass-123",
+        )
+        product = Product.objects.get(slug="iphone-17-pro")
+        order = Order.objects.create(
+            user=user,
+            first_name="No",
+            email=user.email,
+            phone="+998901234567",
+            total_price=product.price,
+        )
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            product_name=product.name,
+            product_price=product.price,
+            quantity=1,
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(response, "Hisobim")
+        self.assertNotContains(response, "Profil")
+        self.assertNotContains(response, "profil rasmi")
+        self.assertNotContains(response, "profilingiz")
 
 
 class SocialLoginTests(TestCase):
