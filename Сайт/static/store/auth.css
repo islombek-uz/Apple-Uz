@@ -1,4 +1,4 @@
-`.nav-auth-form { margin: 0; }
+.nav-auth-form { margin: 0; }
 .nav-auth-link { padding: 0; border: 0; background: transparent; color: #3a3a3c; font: inherit; font-size: 12px; cursor: pointer; }
 .nav-auth-link:hover { color: var(--blue); }
 .site-notices { position: fixed; z-index: 200; top: 78px; right: 24px; display: grid; width: min(420px, calc(100vw - 32px)); gap: 10px; pointer-events: none; }
@@ -161,4 +161,50 @@
   .cart-checkout { padding: 22px 18px; }
   .cart-item { align-items: flex-start; flex-direction: column; gap: 12px; }
   .cart-item-controls { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .account-page { width: calc(100% - 20px); padding-top: 12px; }
+  .account-hero { padding: 20px 16px; }
+  .account-hero-main { width: 100%; }
+  .account-avatar { width: 64px; height: 64px; }
+  .account-title { font-size: 23px; }
+  .account-email { font-size: 13px; }
+  .account-meta { align-items: flex-start; line-height: 1.4; }
+  .account-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .account-stat { min-width: 0; }
+  .account-stat:last-child { grid-column: 1 / -1; }
+  .account-stat dd { font-size: 18px; }
+  .account-columns { gap: 16px; margin-top: 16px; }
+  .account-card, .account-history { padding: 18px 14px; }
+  .account-card-head h2, .account-history-head h2 { font-size: 19px; }
+  .account-email-row { padding: 12px; }
+  .account-avatar-edit { width: 100%; }
+  .account-avatar-controls { width: 100%; }
+  .account-file-input { width: 100%; }
+  .account-history-head { align-items: flex-start; }
+  .account-history-count { white-space: nowrap; }
+  .account-history-list { gap: 12px; padding-left: 15px; }
+  .account-order { padding: 14px 12px; }
+  .account-order-dot { left: -15px; }
+  .account-order-head { gap: 8px; }
+  .account-order-title h3 { font-size: 14px; }
+  .account-order-items li,
+  .account-order-foot { gap: 8px; }
+  .account-order-items strong,
+  .account-order-foot strong { font-size: 12px; }
+  .order-status { padding: 5px 8px; }
+  .auth-submit { width: 100%; }
+}
+
+@media (max-width: 360px) {
+  .account-page { width: calc(100% - 12px); }
+  .account-hero-main { gap: 10px; }
+  .account-avatar { width: 56px; height: 56px; }
+  .account-title { font-size: 21px; }
+  .account-stats { grid-template-columns: minmax(0, 1fr); }
+  .account-stat:last-child { grid-column: auto; }
+  .account-history-head { flex-direction: column; }
+  .account-order-head { flex-direction: column; }
+  .account-order-items li,
+  .account-order-foot { flex-direction: column; }
 }
